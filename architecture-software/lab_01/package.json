@@ -1,0 +1,14 @@
+{
+  "name": "animals-lab",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "ts-node src/main.ts",
+    "build": "tsc",
+    "run:built": "node dist/main.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "ts-node": "^10.9.2",
+    "@types/node": "^20.0.0"
+  }
+}
