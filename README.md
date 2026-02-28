@@ -7,7 +7,7 @@ Laboratory works for the Software Engineering program.
 | # | Discipline | Directory |
 |---|-----------|-----------|
 | 1 | Software Development Workshop | `software-development-workshop/` |
-| 2 | Software Architecture & Design | `software-architecture-design/` |
+| 2 | Software Architecture & Design | `architecture-software/` |
 | 3 | Software Construction & Documentation | `software-construction-documentation/` |
 | 4 | Algorithms & Data Structures | `algorithms-data-structures/` |
 
