@@ -166,7 +166,7 @@ export abstract class Animal implements ICanEat {
     if (nowHappy !== this._isHappy) {
       this._isHappy = nowHappy;
       this._onHappinessChangedHandlers.forEach(h => h(this));
-    }
+    } 
   }
 
   private _die(reason: string): void {

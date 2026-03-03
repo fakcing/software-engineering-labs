@@ -4,12 +4,12 @@ Laboratory works for the Software Engineering program.
 
 ## Disciplines
 
-| # | Discipline | Directory |
-|---|-----------|-----------|
-| 1 | Software Development Workshop | `software-development-workshop/` |
-| 2 | Software Architecture & Design | `architecture-software/` |
-| 3 | Software Construction & Documentation | `software-construction-documentation/` |
-| 4 | Algorithms & Data Structures | `algorithms-data-structures/` |
+| #   | Discipline                            | Directory                              |
+| --- | ------------------------------------- | -------------------------------------- |
+| 1   | Software Development Workshop         | `software-development-workshop/`       |
+| 2   | Software Architecture & Design        | `architecture-software/`               |
+| 3   | Software Construction & Documentation | `software-construction-documentation/` |
+| 4   | Algorithms & Data Structures          | `algorithms-data-structures/`          |
 
 ## Structure
 
@@ -23,4 +23,6 @@ software-engineering-labs/
 ├── software-architecture-design/
 ├── software-construction-documentation/
 └── algorithms-data-structures/
+   ├── lab_1_1/
+   └── lab_1_2/
 ```
