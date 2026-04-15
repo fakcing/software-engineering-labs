@@ -30,10 +30,10 @@ public abstract class Document
     /// <summary>
     /// Повертає тип документа у вигляді рядка.
     /// </summary>
-    public abstract string GetType();
+    public abstract string GetDocumentType();
 
     /// <summary>Рядкове представлення для виведення у списках.</summary>
-    public override string ToString() => $"[{GetType()}] {Title} від {IssuedDate}";
+    public override string ToString() => $"[{GetDocumentType()}] {Title} від {IssuedDate}";
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -54,7 +54,7 @@ public class IdentityDocument : Document
     public override bool Validate() => ExpiryDate >= DateOnly.FromDateTime(DateTime.Today);
 
     /// <inheritdoc/>
-    public override string GetType() => "Документ, що посвідчує особу";
+    public override string GetDocumentType() => "Документ, що посвідчує особу";
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -75,7 +75,7 @@ public class EducationDocument : Document
     public override bool Validate() => IssuedDate <= DateOnly.FromDateTime(DateTime.Today);
 
     /// <inheritdoc/>
-    public override string GetType() => "Освітній документ";
+    public override string GetDocumentType() => "Освітній документ";
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -94,5 +94,5 @@ public class ContractDocument : Document
         ContractEndDate is null || ContractEndDate >= DateOnly.FromDateTime(DateTime.Today);
 
     /// <inheritdoc/>
-    public override string GetType() => "Трудовий договір";
+    public override string GetDocumentType() => "Трудовий договір";
 }
