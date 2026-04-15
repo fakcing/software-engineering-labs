@@ -1,5 +1,5 @@
 {
-  "name": "animals-lab",
+  "name": "lab_01",
   "version": "1.0.0",
   "scripts": {
     "start": "ts-node src/main.ts",
