@@ -1,0 +1,4 @@
+(abc%#**(xyz%#%%(hello*WORLD#%%(*CAP#*(123*ABZ#%%(abc*#
+(%#**(1%#%%(test%%*CAP#
+(valid%#*%(bad#**(no_paren%#
+(z*ABC#%%(one%%two*%(three%#
