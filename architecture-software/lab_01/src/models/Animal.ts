@@ -5,11 +5,13 @@ type AnimalEventHandler = (animal: Animal) => void;
 export abstract class Animal implements ICanEat {
   abstract readonly species: string;
 
+//приватний контекс
   private static readonly MAX_MEALS_PER_DAY = 5;
   private static readonly MIN_MEAL_INTERVAL_H = 24 / Animal.MAX_MEALS_PER_DAY;
   private static readonly HUNGER_THRESHOLD_H = 8;
   private static readonly DEATH_THRESHOLD_H = 24;
 
+//стан тварини
   private _isAlive = true;
   private _isHappy = false;
   private _lastMealTime: number;
@@ -18,6 +20,7 @@ export abstract class Animal implements ICanEat {
   private _dayStart: number;
   private _currentHours: number;
 
+//обробники подій
   private _onHungryHandlers: AnimalEventHandler[] = [];
   private _onFedHandlers: AnimalEventHandler[] = [];
   private _onCleanedHandlers: AnimalEventHandler[] = [];

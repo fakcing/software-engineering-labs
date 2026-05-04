@@ -140,3 +140,6 @@ console.log(`=== Видалення елементів з периметром >
 ht.deleteByPerimeter(PERIMETER_THRESHOLD);
 
 ht.display("ХЕШ-ТАБЛИЦЯ (після видалення)");
+
+
+alpha = n / m

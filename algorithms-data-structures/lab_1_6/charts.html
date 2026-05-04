@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Lab 1.6 Графіки</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 860px; margin: 30px auto; background: #f0f0f0; }
+    h1 { font-size: 1.3rem; margin-bottom: 10px; }
+    h2 { font-size: 1rem; color: #444; margin-bottom: 12px; }
+    .box { background: #fff; padding: 18px 20px; margin: 20px 0; border: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+
+<h1>Lab 1.6. Час виконання залежно від розташування елементів</h1>
+
+<div class="box">
+  <h2>Рівень 1. Вставка у впорядкований список</h2>
+  <canvas id="c1"></canvas>
+</div>
+
+<div class="box">
+  <h2>Рівень 2. Лінійний пошук: список та масив</h2>
+  <canvas id="c2"></canvas>
+</div>
+
+<div class="box">
+  <h2>Рівень 3. Best / Average / Worst (N = 5000)</h2>
+  <canvas id="c3"></canvas>
+</div>
+
+<script>
+new Chart(document.getElementById('c1'), {
+  type: 'line',
+  data: {
+    labels: ['N=20', 'N=400', 'N=8000'],
+    datasets: [{
+      label: 'Час вставки (мс)',
+      data: [0.0652, 0.4659, 49.7365],
+      borderColor: '#4e79a7',
+      backgroundColor: 'rgba(78,121,167,0.1)',
+      pointRadius: 4,
+      tension: 0.2,
+      fill: true
+    }]
+  },
+  options: {
+    plugins: { legend: { position: 'top' } },
+    scales: {
+      y: { title: { display: true, text: 'мс' } },
+      x: { title: { display: true, text: 'N' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('c2'), {
+  type: 'line',
+  data: {
+    labels: ['N=20', 'N=400', 'N=8000'],
+    datasets: [
+      {
+        label: 'Список (мс)',
+        data: [0.0304, 0.0201, 1.0237],
+        borderColor: '#e15759',
+        backgroundColor: 'rgba(225,87,89,0.1)',
+        pointRadius: 4,
+        tension: 0.2,
+        fill: true
+      },
+      {
+        label: 'Масив (мс)',
+        data: [0.0395, 0.0179, 0.2134],
+        borderColor: '#59a14f',
+        backgroundColor: 'rgba(89,161,79,0.1)',
+        pointRadius: 4,
+        tension: 0.2,
+        fill: true
+      }
+    ]
+  },
+  options: {
+    plugins: { legend: { position: 'top' } },
+    scales: {
+      y: { title: { display: true, text: 'мс' } },
+      x: { title: { display: true, text: 'N' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('c3'), {
+  type: 'bar',
+  data: {
+    labels: ['Best', 'Average', 'Worst'],
+    datasets: [
+      {
+        label: 'Список (мс)',
+        data: [0.0016, 0.0086, 0.0159],
+        backgroundColor: 'rgba(225,87,89,0.7)'
+      },
+      {
+        label: 'Масив (мс)',
+        data: [0.0014, 0.0009, 0.0016],
+        backgroundColor: 'rgba(89,161,79,0.7)'
+      }
+    ]
+  },
+  options: {
+    plugins: { legend: { position: 'top' } },
+    scales: {
+      y: { title: { display: true, text: 'мс' } },
+      x: { title: { display: true, text: 'Випадок' } }
+    }
+  }
+});
+</script>
+
+</body>
+</html>
