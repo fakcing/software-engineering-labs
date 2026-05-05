@@ -2,7 +2,9 @@ import * as readline from 'readline';
 import { Cat } from './models/Cat';
 import { Parrot } from './models/Parrot';
 import { Snake } from './models/Snake';
+import { Animal } from './models/Animal';
 import { CatFactory, ParrotFactory, SnakeFactory } from './factory/AnimalFactory';
+import { IAnimalFactory } from './factory/IAnimalFactory';
 import { OwnerHabitat } from './habitats/OwnerHabitat';
 import { PetShopHabitat } from './habitats/PetShopHabitat';
 import { WildHabitat } from './habitats/WildHabitat';
@@ -24,7 +26,7 @@ function section(title: string): void {
 }
 
 function runScenario1(): void {
-  section("СЦЕНАРІЙ 1: Хазяїн Олена — Factory Method + Observer");
+  section("СЦЕНАРІЙ 1: Хазяїн Олена - Factory Method + Observer");
 
   const sim1 = new TimeSimulator(0);
   const catFactory = new CatFactory();
@@ -168,6 +170,186 @@ function runScenario4(): void {
   console.log(`  Тварина Івана: ${ivan.animal}`);
 }
 
+// ─── Interactive mode ────────────────────────────────────────────────────────
+
+type AnimalType   = 'cat' | 'parrot' | 'snake';
+type HabitatType  = 'owner' | 'petshop' | 'wild';
+
+function getFactory(type: AnimalType): IAnimalFactory {
+  switch (type) {
+    case 'cat':    return new CatFactory();
+    case 'parrot': return new ParrotFactory();
+    case 'snake':  return new SnakeFactory();
+  }
+}
+
+function buildInteractiveActions(
+  animalType: AnimalType,
+  animal: Animal,
+  sim: TimeSimulator,
+  feedFn: (() => void) | null,
+  cleanFn: (() => void) | null,
+): Record<string, { label: string; run: () => void }> {
+  const actions: Record<string, { label: string; run: () => void }> = {};
+  let idx = 1;
+
+  if (feedFn) {
+    actions[String(idx++)] = { label: 'Нагодувати', run: feedFn };
+  }
+  if (cleanFn) {
+    actions[String(idx++)] = { label: 'Прибрати', run: cleanFn };
+  }
+
+  actions[String(idx++)] = { label: '+1 година',    run: () => sim.advance(1) };
+  actions[String(idx++)] = { label: '+8 годин',     run: () => sim.advance(8) };
+  actions[String(idx++)] = { label: '+24 години',   run: () => sim.advance(24) };
+  actions[String(idx++)] = { label: 'Стан тварини', run: () => console.log(`\n  ${animal}`) };
+
+  if (animalType === 'cat' || animalType === 'parrot') {
+    actions[String(idx++)] = {
+      label: 'Ходити',
+      run: () => tryAction('Ходити', () => (animal as Cat | Parrot).walk()),
+    };
+  }
+  if (animalType === 'cat') {
+    actions[String(idx++)] = { label: 'Бігти',   run: () => tryAction('Бігти',   () => (animal as Cat).run()) };
+    actions[String(idx++)] = { label: 'Нявкати', run: () => tryAction('Нявкати', () => (animal as Cat).sing()) };
+  }
+  if (animalType === 'parrot') {
+    actions[String(idx++)] = { label: 'Літати', run: () => tryAction('Літати', () => (animal as Parrot).fly()) };
+    actions[String(idx++)] = { label: 'Співати', run: () => tryAction('Співати', () => (animal as Parrot).sing()) };
+  }
+  if (animalType === 'snake') {
+    actions[String(idx++)] = { label: 'Повзти', run: () => tryAction('Повзти', () => (animal as Snake).crawl()) };
+  }
+
+  return actions;
+}
+
+function runInteractive(rl: readline.Interface): void {
+  section('ІНТЕРАКТИВНИЙ РЕЖИМ');
+
+  const habitatMenu: Record<string, { label: string; type: HabitatType }> = {
+    '1': { label: 'Хазяїн (OwnerHabitat)',      type: 'owner' },
+    '2': { label: 'Зоомагазин (PetShopHabitat)', type: 'petshop' },
+    '3': { label: 'Дика природа (WildHabitat)',  type: 'wild' },
+  };
+
+  const animalMenu: Record<string, { label: string; type: AnimalType }> = {
+    '1': { label: 'Кіт',    type: 'cat' },
+    '2': { label: 'Папуга', type: 'parrot' },
+    '3': { label: 'Змія',   type: 'snake' },
+  };
+
+  console.log('\n  Оберіть середовище:');
+  for (const [k, v] of Object.entries(habitatMenu)) {
+    console.log(`    ${k}. ${v.label}`);
+  }
+
+  rl.question('\nВаш вибір: ', (hChoice) => {
+    const pickedHabitat = habitatMenu[hChoice.trim()];
+    if (!pickedHabitat) {
+      console.log('  Невідомий тип. Повернення до меню.');
+      prompt();
+      return;
+    }
+
+    const namePrompt =
+      pickedHabitat.type === 'owner'   ? "  Ім'я хазяїна: " :
+      pickedHabitat.type === 'petshop' ? '  Назва магазину: ' :
+                                         '  (Дика природа — назва не потрібна, Enter): ';
+
+    rl.question(namePrompt, (hName) => {
+      const habitatName = hName.trim() ||
+        (pickedHabitat.type === 'owner' ? 'Хазяїн' :
+         pickedHabitat.type === 'petshop' ? 'Зоомагазин' : 'Дика природа');
+
+      console.log('\n  Оберіть тварину:');
+      for (const [k, v] of Object.entries(animalMenu)) {
+        console.log(`    ${k}. ${v.label}`);
+      }
+
+      rl.question('\nВаш вибір: ', (aChoice) => {
+        const pickedAnimal = animalMenu[aChoice.trim()];
+        if (!pickedAnimal) {
+          console.log('  Невідомий тип. Повернення до меню.');
+          prompt();
+          return;
+        }
+
+        rl.question(`  Ім'я ${pickedAnimal.label.toLowerCase()}: `, (aName) => {
+          const animalName = aName.trim() || pickedAnimal.label;
+          const sim = new TimeSimulator(0);
+          const factory = getFactory(pickedAnimal.type);
+
+          let animal: Animal;
+          let feedFn:    (() => void) | null = null;
+          let cleanFn:   (() => void) | null = null;
+          let releaseFn: () => void = () => {};
+
+          if (pickedHabitat.type === 'owner') {
+            const habitat = new OwnerHabitat(habitatName);
+            animal    = habitat.adopt(factory, animalName, sim.nowHours);
+            feedFn    = () => { habitat.feed(); };
+            cleanFn   = () => { habitat.cleanUp(); };
+            releaseFn = () => { habitat.release(); };
+          } else if (pickedHabitat.type === 'petshop') {
+            const habitat = new PetShopHabitat(habitatName);
+            animal    = habitat.addAnimal(factory, animalName, sim.nowHours);
+            feedFn    = () => { habitat.feed(animal); };
+            cleanFn   = () => { habitat.cleanUp(animal); };
+            releaseFn = () => { habitat.removeAnimal(animal); };
+          } else {
+            const habitat = new WildHabitat();
+            animal    = habitat.addAnimal(factory, animalName, sim.nowHours);
+            releaseFn = () => { habitat.removeAnimal(animal); };
+          }
+
+          sim.register(animal);
+          console.log(`\n  Створено: ${animal}`);
+          console.log(`  Середовище: ${pickedHabitat.label}`);
+
+          const actions = buildInteractiveActions(
+            pickedAnimal.type,
+            animal, sim, feedFn, cleanFn,
+          );
+
+          function actionLoop(): void {
+            console.log('\n' + '-'.repeat(62));
+            console.log(`  ${sim.timestamp} | ${animal}`);
+            console.log('-'.repeat(62));
+            for (const [k, v] of Object.entries(actions)) {
+              console.log(`  ${k}. ${v.label}`);
+            }
+            console.log('  q. Назад до головного меню');
+
+            rl.question('\nДія: ', (ans) => {
+              const a = ans.trim().toLowerCase();
+              if (a === 'q') {
+                releaseFn();
+                sim.unregister(animal);
+                prompt();
+                return;
+              }
+              const action = actions[a];
+              if (action) {
+                action.run();
+              } else {
+                console.log(`  Невідома дія: "${a}"`);
+              }
+              actionLoop();
+            });
+          }
+
+          actionLoop();
+        });
+      });
+    });
+  });
+}
+
+// ─── Menu ────────────────────────────────────────────────────────────────────
+
 const scenarios: Record<string, { label: string; run: () => void }> = {
   '1': { label: "Хазяїн Олена — Factory Method + Observer",  run: runScenario1 },
   '2': { label: "Зоомагазин 'Лапки' — кілька тварин",       run: runScenario2 },
@@ -182,6 +364,7 @@ function printMenu(): void {
   for (const [key, { label }] of Object.entries(scenarios)) {
     console.log(`  ${key}. ${label}`);
   }
+  console.log('  5. Інтерактивний режим');
   console.log('  q. Вийти');
   console.log('='.repeat(62));
 }
@@ -199,6 +382,11 @@ function prompt(): void {
     if (choice === 'q') {
       console.log('\nДо побачення!');
       rl.close();
+      return;
+    }
+
+    if (choice === '5') {
+      runInteractive(rl);
       return;
     }
 
