@@ -1,0 +1,3 @@
+Hello World this is a test file for letter frequency counting
+The quick brown fox jumps over the lazy dog
+Java programming language is object oriented
