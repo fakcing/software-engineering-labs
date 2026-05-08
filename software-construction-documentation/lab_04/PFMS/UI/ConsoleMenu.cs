@@ -5,10 +5,6 @@ using PFMS.Services;
 
 namespace PFMS.UI;
 
-/// <summary>
-/// Консольний інтерфейс користувача системи PFMS.
-/// Реалізує інтерактивне меню для демонстрації функціональності системи.
-/// </summary>
 public class ConsoleMenu
 {
     private readonly AppDatabase       _db;
@@ -16,7 +12,6 @@ public class ConsoleMenu
     private readonly PersonalFileService _files;
     private readonly AuditService      _audit;
 
-    // Поточний авторизований користувач (для демо — завжди HR-менеджер ID=1)
     private readonly User _currentUser;
     private const string DataPath = "data/pfms.json";
 
@@ -28,15 +23,9 @@ public class ConsoleMenu
         _files     = files;
         _audit     = audit;
 
-        // Для демонстрації: автоматично "входимо" як перший HR-менеджер
         _currentUser = _db.Users.First(u => u.Role == UserRole.HrManager);
     }
 
-    // ── Точка входу ────────────────────────────────────────────────────────
-
-    /// <summary>
-    /// Запускає головний цикл меню. Виходить при виборі опції 0.
-    /// </summary>
     public void Run()
     {
         PrintHeader();
@@ -66,8 +55,6 @@ public class ConsoleMenu
         }
     }
 
-    // ── Меню ───────────────────────────────────────────────────────────────
-
     private static void PrintMainMenu()
     {
         Console.WriteLine("┌─────────────────────────────────────────┐");
@@ -85,8 +72,6 @@ public class ConsoleMenu
         Console.WriteLine("│  0. Вийти                               │");
         Console.WriteLine("└─────────────────────────────────────────┘");
     }
-
-    // ── Обробники опцій ────────────────────────────────────────────────────
 
     private bool ShowEmployeeList()
     {
@@ -139,13 +124,11 @@ public class ConsoleMenu
             HireDate   = DateOnly.FromDateTime(DateTime.Today),
         };
 
-        // Вибір відділу
         Console.WriteLine("\n  Доступні відділи:");
         foreach (var d in _db.Departments)
             Console.WriteLine($"    {d.Id}. {d}");
         emp.DepartmentId = ReadInt("ID відділу");
 
-        // Вибір посади
         Console.WriteLine("\n  Доступні посади:");
         foreach (var p in _db.Positions)
             Console.WriteLine($"    {p.Id}. {p}");
@@ -348,7 +331,7 @@ public class ConsoleMenu
     {
         _db.Save(DataPath);
         Console.WriteLine("  Дані збережено. До побачення!\n");
-        return false; // завершує головний цикл
+        return false;
     }
 
     private static bool UnknownOption()
@@ -357,8 +340,6 @@ public class ConsoleMenu
         Pause();
         return true;
     }
-
-    // ── Утиліти введення ───────────────────────────────────────────────────
 
     private static string ReadLine(string prompt)
     {

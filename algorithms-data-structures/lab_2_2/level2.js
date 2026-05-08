@@ -1,71 +1,26 @@
-/**
- * Лабораторна робота 2.2 — Рівень 2
- * Скінченний автомат (синтаксичний аналізатор) на базі switch
- *
- * Варіант 17. Регулярний вираз: ([^A-Z]+(% | \*[A-Z]+)#
- *
- * Розбір шаблону:
- *   (         — literal відкриваюча дужка
- *   [^A-Z]+   — один або більше символів (не A-Z)
- *   %         — символ «%» (перший варіант завершення)
- *   |         — АБО
- *   \*[A-Z]+  — символ «*», за яким один або більше A-Z
- *   )         — literal закриваюча дужка — НЕ потрібна (немає в шаблоні)
- *   #         — символ «#» (кінець)
- *
- * Граф скінченного автомата:
- *
- *          (           [^A-Z]         %             #
- *  S_START ──→ S_OPEN ──────→ S_NC ──────→ S_AFTER_PCT ──→ S_ACCEPT
- *                               │   [^A-Z]   ↑ (self)
- *                               │            
- *                               │    *          [A-Z]       [A-Z]       #
- *                               └──────→ S_STAR ──────→ S_CAP ────→ S_CAP ──→ S_ACCEPT
- *                               (self-loop: [^A-Z] without %,*,#,A-Z stays in S_NC)
- *
- * Таблиця переходів:
- * ┌─────────────┬──────┬────────┬───────┬──────┬───────┬──────┬───────┐
- * │ Стан        │  (   │ [^A-Z] │   %   │  *   │ [A-Z] │  #   │ інше  │
- * ├─────────────┼──────┼────────┼───────┼──────┼───────┼──────┼───────┤
- * │ S_START     │ OPEN │ ERROR  │ ERROR │ERROR │ ERROR │ERROR │ ERROR │
- * │ S_OPEN      │ERROR │  S_NC  │ ERROR │ERROR │ ERROR │ERROR │ ERROR │
- * │ S_NC        │ERROR │  S_NC  │ S_PCT │S_STAR│ ERROR │ERROR │ ERROR │
- * │ S_AFTER_PCT │ERROR │ ERROR  │ ERROR │ERROR │ ERROR │ ACC  │ ERROR │
- * │ S_STAR      │ERROR │ ERROR  │ ERROR │ERROR │ S_CAP │ERROR │ ERROR │
- * │ S_CAP       │ERROR │ ERROR  │ ERROR │ERROR │ S_CAP │ ACC  │ ERROR │
- * │ S_ACCEPT    │ERROR │ ERROR  │ ERROR │ERROR │ ERROR │ERROR │ ERROR │
- * │ S_ERROR     │ERROR │ ERROR  │ ERROR │ERROR │ ERROR │ERROR │ ERROR │
- * └─────────────┴──────┴────────┴───────┴──────┴───────┴──────┴───────┘
- *
- * Стани — реалізовані через Enum (об'єкт з freeze)
- */
-
 const readline = require("readline");
 
-// ─── Enum станів ──────────────────────────────────────────────────────────────
 const State = Object.freeze({
   START:     "START",
-  OPEN:      "OPEN",      // прочитали '('
-  NC:        "NC",        // читаємо [^A-Z]+ (non-capital chars)
-  AFTER_PCT: "AFTER_PCT", // прочитали '%', чекаємо '#'
-  STAR:      "STAR",      // прочитали '*', чекаємо [A-Z]
-  CAP:       "CAP",       // читаємо [A-Z]+
-  ACCEPT:    "ACCEPT",    // прийнятий
-  ERROR:     "ERROR",     // помилка
+  OPEN:      "OPEN",
+  NC:        "NC",
+  AFTER_PCT: "AFTER_PCT",
+  STAR:      "STAR",
+  CAP:       "CAP",
+  ACCEPT:    "ACCEPT",
+  ERROR:     "ERROR",
 });
 
-// ─── Класифікатор символів ────────────────────────────────────────────────────
 function charClass(ch) {
   if (ch === "(")            return "OPEN_PAREN";
   if (ch === "#")            return "HASH";
   if (ch === "%")            return "PERCENT";
   if (ch === "*")            return "STAR";
   if (/[A-Z]/.test(ch))     return "UPPER";
-  if (/[^A-Z#%*(]/.test(ch))return "NONCAP";  // все крім спеціальних
+  if (/[^A-Z#%*(]/.test(ch))return "NONCAP";
   return "OTHER";
 }
 
-// ─── Один крок автомата (switch) ─────────────────────────────────────────────
 function nextState(state, ch) {
   const cls = charClass(ch);
 
@@ -78,58 +33,53 @@ function nextState(state, ch) {
       }
 
     case State.OPEN:
-      // Після '(' очікуємо [^A-Z] — тобто все крім великих літер
-      // '(' теж є [^A-Z], але ми вже використали його для входу
       switch (cls) {
         case "NONCAP":
-        case "PERCENT":    // '%' — теж не A-Z, може бути першим символом NC
-        case "STAR":       // '*' — теж не A-Z
-        case "HASH":       // '#' — теж не A-Z (але призведе до помилки пізніше)
-          // Але ми хочемо потрапити в S_NC лише якщо символ ≠ '%', '*', '#'
-          // щоб одразу спрацьовували спеціальні переходи
+        case "PERCENT":
+        case "STAR":
+        case "HASH":
           if (cls === "NONCAP") return State.NC;
-          return State.ERROR;  // після '(' відразу '%', '*', '#' — помилка
+          return State.ERROR;
         default:           return State.ERROR;
       }
 
     case State.NC:
       switch (cls) {
-        case "NONCAP":     return State.NC;        // ще один [^A-Z]
-        case "PERCENT":    return State.AFTER_PCT; // перейшли до '%'
-        case "STAR":       return State.STAR;      // перейшли до '*'
-        default:           return State.ERROR;     // A-Z, '#', '(' — помилка
+        case "NONCAP":     return State.NC;
+        case "PERCENT":    return State.AFTER_PCT;
+        case "STAR":       return State.STAR;
+        default:           return State.ERROR;
       }
 
     case State.AFTER_PCT:
       switch (cls) {
-        case "HASH":       return State.ACCEPT;    // '(' [^A-Z]+ '%' '#' — OK
+        case "HASH":       return State.ACCEPT;
         default:           return State.ERROR;
       }
 
     case State.STAR:
       switch (cls) {
-        case "UPPER":      return State.CAP;       // '*' A-Z — OK
+        case "UPPER":      return State.CAP;
         default:           return State.ERROR;
       }
 
     case State.CAP:
       switch (cls) {
-        case "UPPER":      return State.CAP;       // ще більших літер
-        case "HASH":       return State.ACCEPT;    // завершення '#'
+        case "UPPER":      return State.CAP;
+        case "HASH":       return State.ACCEPT;
         default:           return State.ERROR;
       }
 
-    case State.ACCEPT:     return State.ERROR;     // зайвий символ
+    case State.ACCEPT:     return State.ERROR;
     case State.ERROR:      return State.ERROR;
 
     default:               return State.ERROR;
   }
 }
 
-// ─── Аналіз рядка ─────────────────────────────────────────────────────────────
 function analyze(input) {
   let state   = State.START;
-  const trace = [];   // лог переходів
+  const trace = [];
 
   for (let i = 0; i < input.length; i++) {
     const ch   = input[i];
@@ -143,7 +93,6 @@ function analyze(input) {
   return { state, accepted, trace };
 }
 
-// ─── Вивід трасування ─────────────────────────────────────────────────────────
 function printTrace(input, result) {
   console.log(`\n Рядок: "${input}"`);
   console.log(" " + "─".repeat(60));
@@ -160,7 +109,6 @@ function printTrace(input, result) {
   console.log(` Результат: ${result.accepted ? "✓ ПРИЙНЯТИЙ" : "✗ ВІДХИЛЕНИЙ"}\n`);
 }
 
-// ─── Приклади для демонстрації ────────────────────────────────────────────────
 function runExamples() {
   const examples = [
     { input: "(abc%#",       desc: "коректний — [^A-Z]+ та %#" },
@@ -184,7 +132,6 @@ function runExamples() {
   });
 }
 
-// ─── Головна функція ──────────────────────────────────────────────────────────
 function main() {
   console.log("\n════════════════════════════════════════════════════");
   console.log(" Рівень 2 — Скінченний автомат (switch)");

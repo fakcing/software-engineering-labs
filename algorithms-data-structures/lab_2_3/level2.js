@@ -1,36 +1,11 @@
-/**
- * Лабораторна робота 2.3 — Рівень 2
- * Комбінаторні алгоритми. Вибірка З повтореннями.
- *
- * Варіант 17:
- *   Дано:  Слово — «програмування»
- *   Знайти: Кількість різних слів, що формуються з букв даного слова.
- *
- * Тип задачі: ПЕРЕСТАНОВКА з повтореннями — P(n; k₁, k₂, ..., km)
- *   Використовуємо ВСІ букви слова, але деякі повторюються.
- *   Порядок важливий (різний порядок = різне слово).
- *
- * Формула: P(n; k₁,...,km) = n! / (k₁! × k₂! × ... × km!)
- *
- * Літери слова «програмування» (13 букв):
- *   п×1, р×2, о×1, г×1, а×2, м×1, у×1, в×1, н×2, я×1
- *
- * P = 13! / (1!×2!×1!×1!×2!×1!×1!×1!×2!×1!)
- *   = 13! / (2!×2!×2!)
- *   = 6 227 020 800 / 8
- *   = 778 377 600
- */
-
 const readline = require("readline");
 
-// ─── BigInt факторіал ─────────────────────────────────────────────────────────
 function factorial(n) {
   let r = 1n;
   for (let i = 2n; i <= BigInt(n); i++) r *= i;
   return r;
 }
 
-// ─── Аналіз слова: частота кожної букви ──────────────────────────────────────
 function analyzeWord(word) {
   const freq = {};
   for (const ch of word) {
@@ -39,8 +14,6 @@ function analyzeWord(word) {
   return freq;
 }
 
-// ─── Перестановка з повтореннями ─────────────────────────────────────────────
-// P(n; k1, k2, ...) = n! / (k1! * k2! * ...)
 function permutationWithRepetition(word) {
   const freq   = analyzeWord(word);
   const n      = word.length;
@@ -54,31 +27,25 @@ function permutationWithRepetition(word) {
   return { result: numBig / den, numerator: numBig, denominator: den, freq, n };
 }
 
-// ─── Порівняння з іншими типами вибірок ─────────────────────────────────────
 function comparisonTable(word) {
   const n = word.length;
   const N = BigInt(n);
 
-  // Перестановка без повторень (якби всі літери різні)
   const pureP = factorial(n);
 
-  // Перестановка з повтореннями (наша задача)
   const { result } = permutationWithRepetition(word);
 
-  // Комбінація — вибрати k з n (для прикладу k=3)
   const k = 3n;
   const C = factorial(N) / (factorial(k) * factorial(N - k));
 
   return { pureP, withRep: result, C };
 }
 
-// ─── Генерація кількох прикладів перестановок ─────────────────────────────────
-// Для демонстрації — лексикографічний алгоритм (наступна перестановка)
 function nextPermutation(arr) {
   const a = [...arr];
   let i = a.length - 2;
   while (i >= 0 && a[i] >= a[i + 1]) i--;
-  if (i < 0) return null; // остання перестановка
+  if (i < 0) return null;
   let j = a.length - 1;
   while (a[j] <= a[i]) j--;
   [a[i], a[j]] = [a[j], a[i]];
@@ -105,7 +72,6 @@ function demoPermutations(word, count = 12) {
   return demos;
 }
 
-// ─── Головна функція ──────────────────────────────────────────────────────────
 function solve(word) {
   const { result, numerator, denominator, freq, n } = permutationWithRepetition(word);
   const comp = comparisonTable(word);
@@ -161,7 +127,6 @@ function solve(word) {
   console.log(`   ... загалом ${result} варіантів\n`);
 }
 
-// ─── Введення з клавіатури ────────────────────────────────────────────────────
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
 console.log("Комбінаторика — Рівень 2: Перестановки з повтореннями");

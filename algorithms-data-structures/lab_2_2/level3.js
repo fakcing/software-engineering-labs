@@ -1,44 +1,7 @@
-/**
- * Лабораторна робота 2.2 — Рівень 3
- * Скінченний автомат на основі таблиці переходів + зчитування файлу
- *
- * Варіант 17:
- *   Регулярний вираз:  ([^A-Z]+(% | \*[A-Z]+)#
- *   Роздільники слів:  «*»  та  «%%»
- *
- * Таблиця переходів (transition table):
- *
- * Класи вхідних символів:
- *   0: '('       — відкриваюча дужка
- *   1: [^A-Z%*#(] — звичайний не-великий символ (цифра, мала літера, тощо)
- *   2: '%'       — символ відсотка
- *   3: '*'       — зірочка
- *   4: [A-Z]     — велика літера
- *   5: '#'       — символ решітки
- *   6: інше      — все решта
- *
- * Стани:
- *   0: START      1: OPEN      2: NC
- *   3: AFTER_PCT  4: STAR      5: CAP
- *   6: ACCEPT     7: ERROR
- *
- * Таблиця (рядок = стан, стовпець = клас символу):
- *          '('  [^A-Z] '%'  '*'  [A-Z] '#'  інше
- * START  [ 1,    7,    7,   7,    7,    7,   7  ]  стан 0
- * OPEN   [ 7,    2,    7,   7,    7,    7,   7  ]  стан 1
- * NC     [ 7,    2,    3,   4,    7,    7,   7  ]  стан 2
- * PCT    [ 7,    7,    7,   7,    7,    6,   7  ]  стан 3
- * STAR   [ 7,    7,    7,   7,    5,    7,   7  ]  стан 4
- * CAP    [ 7,    7,    7,   7,    5,    6,   7  ]  стан 5
- * ACCEPT [ 7,    7,    7,   7,    7,    7,   7  ]  стан 6
- * ERROR  [ 7,    7,    7,   7,    7,    7,   7  ]  стан 7
- */
-
 const fs       = require("fs");
 const path     = require("path");
 const readline = require("readline");
 
-// ─── Enum станів ──────────────────────────────────────────────────────────────
 const State = Object.freeze({
   START:     0,
   OPEN:      1,
@@ -52,7 +15,6 @@ const State = Object.freeze({
 
 const STATE_NAMES = ["START", "OPEN", "NC", "AFTER_PCT", "STAR", "CAP", "ACCEPT", "ERROR"];
 
-// ─── Класи символів ───────────────────────────────────────────────────────────
 const CharClass = Object.freeze({
   OPEN_PAREN: 0,
   NONCAP:     1,
@@ -73,22 +35,18 @@ function getCharClass(ch) {
   return CharClass.OTHER;
 }
 
-// ─── Таблиця переходів ────────────────────────────────────────────────────────
-// TRANSITION[state][charClass] = nextState
 const E = State.ERROR;
 const TRANSITION = [
-  //  (          NC  %  *  A-Z  #  other
-  [ State.OPEN,  E,  E, E,  E,  E,  E ],  // 0: START
-  [ E,           2,  E, E,  E,  E,  E ],  // 1: OPEN
-  [ E,           2,  3, 4,  E,  E,  E ],  // 2: NC
-  [ E,           E,  E, E,  E,  6,  E ],  // 3: AFTER_PCT
-  [ E,           E,  E, E,  5,  E,  E ],  // 4: STAR
-  [ E,           E,  E, E,  5,  6,  E ],  // 5: CAP
-  [ E,           E,  E, E,  E,  E,  E ],  // 6: ACCEPT
-  [ E,           E,  E, E,  E,  E,  E ],  // 7: ERROR
+  [ State.OPEN,  E,  E, E,  E,  E,  E ],
+  [ E,           2,  E, E,  E,  E,  E ],
+  [ E,           2,  3, 4,  E,  E,  E ],
+  [ E,           E,  E, E,  E,  6,  E ],
+  [ E,           E,  E, E,  5,  E,  E ],
+  [ E,           E,  E, E,  5,  6,  E ],
+  [ E,           E,  E, E,  E,  E,  E ],
+  [ E,           E,  E, E,  E,  E,  E ],
 ];
 
-// ─── Розпізнавання рядка (for-цикл на таблиці) ───────────────────────────────
 function recognize(word) {
   let state = State.START;
 
@@ -105,9 +63,6 @@ function recognize(word) {
   return { accepted, finalState: STATE_NAMES[state], errorAt: -1, errorChar: null };
 }
 
-// ─── Читання файлу та розбивка за роздільниками ───────────────────────────────
-// Роздільники варіанту 17: «*» та «%%»
-// Розбиваємо за регулярним виразом /\*|%%/
 const DELIMITER_REGEX = /\*|%%/;
 
 function readAndSplit(filePath) {
@@ -124,7 +79,6 @@ function readAndSplit(filePath) {
   return allWords;
 }
 
-// ─── Вивід таблиці переходів ──────────────────────────────────────────────────
 function printTransitionTable() {
   const headers = ["'('", "[^A-Z]", "'%'", "'*'", "[A-Z]", "'#'", "інше"];
   const rows    = ["START", "OPEN", "NC", "PCT", "STAR", "CAP", "ACCEPT", "ERROR"];
@@ -141,7 +95,6 @@ function printTransitionTable() {
   console.log(" " + "─".repeat(hdr.length));
 }
 
-// ─── Головна функція ──────────────────────────────────────────────────────────
 function main(filePath) {
   console.log("\n════════════════════════════════════════════════════");
   console.log(" Рівень 3 — Автомат на таблиці переходів + файл");
@@ -152,11 +105,9 @@ function main(filePath) {
 
   printTransitionTable();
 
-  // Читання та розбивка файлу
   const words = readAndSplit(filePath);
   console.log(`\n  Знайдено слів після розбивки: ${words.length}`);
 
-  // Перевірка кожного слова
   const accepted  = [];
   const rejected  = [];
 
@@ -191,7 +142,6 @@ function main(filePath) {
   console.log();
 }
 
-// ─── Запуск ───────────────────────────────────────────────────────────────────
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 const defaultFile = path.join(__dirname, "data.txt");
 

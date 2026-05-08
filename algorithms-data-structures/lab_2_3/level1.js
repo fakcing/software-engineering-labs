@@ -1,27 +1,5 @@
-/**
- * Лабораторна робота 2.3 — Рівень 1
- * Комбінаторні алгоритми. Вибірка БЕЗ повторень.
- *
- * Варіант 17:
- *   Дано:  Студенти, що проживають у гуртожитку на одному поверсі — 16 осіб
- *   Знайти: Скількома способами можна скласти графік чергування на один день,
- *           якщо кожен день чергують 3 студенти?
- *
- * Тип задачі: КОМБІНАЦІЯ без повторень — C(n, k)
- *   Порядок обраних студентів НЕ важливий (просто хто чергує),
- *   кожен студент може бути обраний лише один раз.
- *
- * Формула: C(n,k) = n! / (k! × (n−k)!)
- *           C(16,3) = 16! / (3! × 13!) = 560
- *
- * Чому КОМБІНАЦІЯ, а не РОЗМІЩЕННЯ?
- *   Розміщення (A) — якби у чергуванні були ролі: "старший", "молодший" тощо.
- *   Тут всі троє рівноправні — просто "чергують", тому порядок неважливий → C.
- */
-
 const readline = require("readline");
 
-// ─── BigInt-факторіал ────────────────────────────────────────────────────────
 function factorial(n) {
   if (n < 0n) throw new RangeError("n < 0");
   let result = 1n;
@@ -29,13 +7,10 @@ function factorial(n) {
   return result;
 }
 
-// ─── C(n, k) — комбінація без повторень ──────────────────────────────────────
-// C(n,k) = n! / (k! × (n-k)!)
-// Оптимізовано: рахуємо тільки k множників зверху і ділимо на k!
 function combination(n, k) {
   if (k > n) return 0n;
   if (k === 0n || k === n) return 1n;
-  if (k > n - k) k = n - k;  // C(n,k) = C(n,n-k), беремо менший k
+  if (k > n - k) k = n - k;
   let num = 1n, den = 1n;
   for (let i = 0n; i < k; i++) {
     num *= (n - i);
@@ -44,8 +19,6 @@ function combination(n, k) {
   return num / den;
 }
 
-// ─── A(n, k) — розміщення без повторень (для порівняння) ─────────────────────
-// A(n,k) = n! / (n-k)!
 function arrangement(n, k) {
   if (k > n) return 0n;
   let result = 1n;
@@ -53,13 +26,10 @@ function arrangement(n, k) {
   return result;
 }
 
-// ─── P(n) — перестановка ─────────────────────────────────────────────────────
 function permutation(n) {
   return factorial(n);
 }
 
-// ─── Генерація всіх комбінацій ────────────────────────────────────────────────
-// Рекурсивний алгоритм: обираємо по одному елементу з масиву
 function* generateCombinations(arr, k, start = 0, current = []) {
   if (current.length === k) {
     yield [...current];
@@ -72,7 +42,6 @@ function* generateCombinations(arr, k, start = 0, current = []) {
   }
 }
 
-// ─── Виведення вирішення задачі ───────────────────────────────────────────────
 function solve(n, k) {
   const N = BigInt(n), K = BigInt(k);
 
@@ -109,12 +78,11 @@ function solve(n, k) {
   console.log(`\n ✓ Відповідь: ${C} способів скласти графік чергування`);
   console.log(`   (для порівняння: якби порядок мав значення — ${A} способів)\n`);
 
-  // Демонстрація перших комбінацій
   const students = Array.from({ length: n }, (_, i) => `С${i + 1}`);
   const combos   = [];
   for (const c of generateCombinations(students, k)) {
     combos.push(c);
-    if (combos.length >= 10) break;  // тільки перші 10 для демо
+    if (combos.length >= 10) break;
   }
 
   console.log(` ─── Перші 10 із ${C} варіантів ──────────────────────`);
@@ -126,7 +94,6 @@ function solve(n, k) {
   return { C, students, k };
 }
 
-// ─── Введення з клавіатури ────────────────────────────────────────────────────
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
 console.log("Комбінаторика — Рівень 1: Комбінації без повторень");

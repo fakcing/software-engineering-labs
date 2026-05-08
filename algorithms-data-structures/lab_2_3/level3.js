@@ -1,31 +1,12 @@
-/**
- * Лабораторна робота 2.3 — Рівень 3
- * Запис повного переліку вибірок у файл
- *
- * Завдання: записати у файл повний перелік комбінацій C(16,3),
- * отриманих під час розв'язання задачі першого рівня.
- *
- * Алгоритм генерації комбінацій:
- *   Рекурсивний алгоритм зворотного відстеження (backtracking):
- *   1. Починаємо з порожньої поточної комбінації
- *   2. Для кожної позиції обираємо елемент, більший за попередній
- *   3. Коли k елементів набрано — записуємо у файл
- *   4. Рекурсивно повертаємось і пробуємо наступний елемент
- *
- * Складність: O(C(n,k) × k) часу, O(k) пам'яті (не зберігаємо всі одразу)
- */
-
 const fs       = require("fs");
 const path     = require("path");
 const readline = require("readline");
 const { combination, generateCombinations, factorial } = require("./level1");
 
-// ─── Запис комбінацій у файл ─────────────────────────────────────────────────
 function writeToFile(filePath, n, k) {
   const students = Array.from({ length: n }, (_, i) => `Студент_${String(i + 1).padStart(2, "0")}`);
   const C        = combination(BigInt(n), BigInt(k));
 
-  // Заголовок файлу
   const header = [
     "═".repeat(60),
     ` Графік чергування — C(${n}, ${k}) = ${C} варіантів`,
@@ -57,16 +38,12 @@ function writeToFile(filePath, n, k) {
   return new Promise((resolve) => stream.on("finish", () => resolve(count)));
 }
 
-// ─── Статистика розподілу ────────────────────────────────────────────────────
-// Для кожного студента — скільки разів він потрапляє у чергування
 function calcDistribution(n, k) {
-  // Кожен студент потрапляє рівно C(n-1, k-1) разів
   const timesPerStudent = combination(BigInt(n - 1), BigInt(k - 1));
   const totalSlots      = combination(BigInt(n), BigInt(k)) * BigInt(k);
   return { timesPerStudent, totalSlots };
 }
 
-// ─── Альтернативний запис: тільки числа ──────────────────────────────────────
 function writeCompactToFile(filePath, n, k) {
   const ids = Array.from({ length: n }, (_, i) => i + 1);
   const C   = combination(BigInt(n), BigInt(k));
@@ -87,7 +64,6 @@ function writeCompactToFile(filePath, n, k) {
   return new Promise((resolve) => stream.on("finish", () => resolve(count)));
 }
 
-// ─── Головна функція ─────────────────────────────────────────────────────────
 async function main(n, k, outDir) {
   console.log("\n════════════════════════════════════════════════════");
   console.log(" Рівень 3 — Запис комбінацій у файл");
@@ -101,7 +77,6 @@ async function main(n, k, outDir) {
   console.log(` Кожен студент потрапляє у чергування: ${dist.timesPerStudent} разів`);
   console.log(` Загальна кількість "людино-чергувань": ${dist.totalSlots}`);
 
-  // Алгоритм — покроково
   console.log(`
  Алгоритм генерації (backtracking):
  ─────────────────────────────────────────────────────
@@ -113,7 +88,6 @@ async function main(n, k, outDir) {
       current.pop()                             // повертаємось
  ─────────────────────────────────────────────────────`);
 
-  // Запис у повний файл
   const fullPath    = path.join(outDir, "combinations_full.txt");
   const compactPath = path.join(outDir, "combinations_compact.txt");
 
@@ -125,7 +99,6 @@ async function main(n, k, outDir) {
   const cnt2 = await writeCompactToFile(compactPath, n, k);
   console.log(` ✓ Записано ${cnt2} комбінацій`);
 
-  // Показати фрагмент файлу
   console.log("\n ─── Перші 8 рядків файлу (компактний) ──────────────");
   const content = fs.readFileSync(compactPath, "utf8").split("\n").slice(0, 11);
   content.forEach(l => console.log("  " + l));
@@ -137,7 +110,6 @@ async function main(n, k, outDir) {
   console.log();
 }
 
-// ─── Запуск ──────────────────────────────────────────────────────────────────
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
 console.log("Комбінаторика — Рівень 3: Запис C(n,k) у файл");

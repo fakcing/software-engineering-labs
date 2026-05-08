@@ -1,36 +1,14 @@
-/**
- * Лабораторна робота 2.1 — Рівень 3
- * Розв'язання диференціального рівняння 1-го порядку
- *
- * Варіант 17: dy/dx = cos(x) − y
- * Метод: Рунге-Кутта 2-го порядку (метод Хьюна / середньої точки)
- *
- * Точний розв'язок (аналітичний):
- *   y(x) = (sin(x) + cos(x)) / 2 + C·e^(−x)
- *   При y(0) = y0: C = y0 − 1/2
- */
-
 const readline = require("readline");
 
-// ─── Права частина ДР ─────────────────────────────────────────────────────────
 function f(x, y) {
   return Math.cos(x) - y;
 }
 
-// ─── Точний розв'язок ─────────────────────────────────────────────────────────
 function exactSolution(x, x0, y0) {
-  // y = (sin(x) + cos(x))/2 + C·e^(−x)
-  // C = (y0 − (sin(x0) + cos(x0))/2) * e^(x0)
   const C = (y0 - (Math.sin(x0) + Math.cos(x0)) / 2) * Math.exp(x0);
   return (Math.sin(x) + Math.cos(x)) / 2 + C * Math.exp(-x);
 }
 
-// ─── Метод Рунге-Кутта 2-го порядку (Хьюна) ──────────────────────────────────
-// k1 = h · f(xₙ, yₙ)
-// k2 = h · f(xₙ + h, yₙ + k1)
-// yₙ₊₁ = yₙ + (k1 + k2) / 2
-//
-// Порядок точності: O(h²) — похибка глобальна O(h²), локальна O(h³)
 function rungeKutta2(x0, y0, xEnd, h) {
   const steps = [];
   let x = x0;
@@ -39,7 +17,6 @@ function rungeKutta2(x0, y0, xEnd, h) {
   steps.push({ x, y, yExact: exactSolution(x, x0, y0), k1: null, k2: null, error: 0 });
 
   while (x < xEnd - 1e-10) {
-    // Не переступаємо xEnd
     if (x + h > xEnd) h = xEnd - x;
 
     const k1 = h * f(x, y);
@@ -57,9 +34,7 @@ function rungeKutta2(x0, y0, xEnd, h) {
   return steps;
 }
 
-// ─── Вивід таблиці результатів ────────────────────────────────────────────────
 function printTable(steps) {
-  const colW = 12;
   const sep  = "─".repeat(72);
 
   console.log("\n  " + sep);
@@ -90,7 +65,6 @@ function printTable(steps) {
 
   console.log("  " + sep);
 
-  // Максимальна та середня похибка
   const errors = steps.map(s => s.error);
   const maxErr = Math.max(...errors);
   const avgErr = errors.reduce((a, b) => a + b, 0) / errors.length;
@@ -98,7 +72,6 @@ function printTable(steps) {
   console.log(`  Сер.  похибка: ${avgErr.toExponential(4)}`);
 }
 
-// ─── Схема алгоритму ──────────────────────────────────────────────────────────
 function printAlgorithmNote() {
   console.log("\n  Алгоритм Рунге-Кутта 2-го порядку (Хьюн):");
   console.log("  ─────────────────────────────────────────────");
@@ -111,7 +84,6 @@ function printAlgorithmNote() {
   console.log("  оскільки враховує нахил і на початку, і в кінці кроку.\n");
 }
 
-// ─── Головна функція ──────────────────────────────────────────────────────────
 function main(x0, y0, xEnd, h) {
   console.log("\n════════════════════════════════════════════════════");
   console.log(" Рівень 3 — Рунге-Кутта 2-го порядку");
@@ -129,7 +101,6 @@ function main(x0, y0, xEnd, h) {
   console.log(`  Значення у кінцевій точці x=${xEnd}: y ≈ ${steps[steps.length - 1].y.toFixed(8)}\n`);
 }
 
-// ─── Введення з клавіатури ────────────────────────────────────────────────────
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
 console.log("Розв'язання ДР: dy/dx = cos(x) − y  методом Рунге-Кутта 2-го порядку");

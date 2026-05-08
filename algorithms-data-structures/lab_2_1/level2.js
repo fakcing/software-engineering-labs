@@ -1,35 +1,20 @@
-/**
- * Лабораторна робота 2.1 — Рівень 2
- * Знаходження коренів алгебричного рівняння
- *
- * Варіант 17: y(x) = x³ − 2cos(πx) = 0
- *
- * Методи: половинчастого ділення (бісекції), дотичних (Ньютона), хорд
- */
-
 const readline = require("readline");
 
-const EPSILON = 1e-6; // точність
-const MAX_ITER = 1000; // захист від нескінченного циклу
+const EPSILON = 1e-6;
+const MAX_ITER = 1000;
 
-// ─── Функція та її похідні ────────────────────────────────────────────────────
 function f(x) {
   return Math.pow(x, 3) - 2 * Math.cos(Math.PI * x);
 }
 
-// f'(x) = 3x² + 2π·sin(πx)
 function df(x) {
   return 3 * x * x + 2 * Math.PI * Math.sin(Math.PI * x);
 }
 
-// f''(x) = 6x + 2π²·cos(πx)
 function d2f(x) {
   return 6 * x + 2 * Math.PI * Math.PI * Math.cos(Math.PI * x);
 }
 
-// ─── Локалізація коренів ──────────────────────────────────────────────────────
-// Ділимо інтервал [a,b] на підінтервали кроком dx.
-// Де f змінює знак — там корінь.
 function locateRoots(a, b, dx = 0.1) {
   const intervals = [];
   let x = a;
@@ -43,9 +28,6 @@ function locateRoots(a, b, dx = 0.1) {
   return intervals;
 }
 
-// ─── Метод половинчастого ділення (Бісекція) ──────────────────────────────────
-// На кожному кроці ділимо відрізок навпіл і беремо ту половину,
-// де функція змінює знак. Збіжність гарантована: O(log₂((b-a)/ε))
 function bisection(a, b) {
   if (f(a) * f(b) > 0) return null;
   const log = [];
@@ -61,12 +43,7 @@ function bisection(a, b) {
   return { root: (a + b) / 2, iter, log };
 }
 
-// ─── Метод дотичних (Ньютона) ─────────────────────────────────────────────────
-// Починаємо з точки x₀ (де f·f'' > 0 — умова збіжності).
-// xₙ₊₁ = xₙ − f(xₙ)/f'(xₙ)
-// Квадратична збіжність, але потрібна f' ≠ 0 та гарний початковий x₀.
 function newton(a, b) {
-  // Вибираємо початкове наближення: кінець де f·f'' > 0
   let x0 = f(a) * d2f(a) > 0 ? a : b;
   const log = [];
   let x = x0;
@@ -74,21 +51,17 @@ function newton(a, b) {
   while (iter < MAX_ITER) {
     const fx  = f(x);
     const dfx = df(x);
-    if (Math.abs(dfx) < 1e-12) break; // f'(x) ≈ 0 — сингулярність
+    if (Math.abs(dfx) < 1e-12) break;
     const xNext = x - fx / dfx;
     log.push({ iter: iter + 1, x, fx, dfx, xNext });
     if (Math.abs(xNext - x) < EPSILON) { x = xNext; break; }
     x = xNext;
     iter++;
   }
-  if (x < a - EPSILON || x > b + EPSILON) return null; // вийшов за межі
+  if (x < a - EPSILON || x > b + EPSILON) return null;
   return { root: x, iter, log };
 }
 
-// ─── Метод хорд ───────────────────────────────────────────────────────────────
-// Проводимо хорду між (a, f(a)) і (b, f(b)).
-// Точка перетину хорди з OX: x = a − f(a)*(b−a)/(f(b)−f(a))
-// Потім замінюємо кінець із тим самим знаком, що й нова точка.
 function chord(a, b) {
   if (f(a) * f(b) > 0) return null;
   const log = [];
@@ -106,9 +79,8 @@ function chord(a, b) {
   return { root: x, iter, log };
 }
 
-// ─── Вивід таблиці ітерацій ───────────────────────────────────────────────────
 function printLog(method, logArr) {
-  const maxRows = 8; // показуємо перші та останні ітерації
+  const maxRows = 8;
   const rows = logArr.length > maxRows
     ? [...logArr.slice(0, 4), null, ...logArr.slice(-3)]
     : logArr;
@@ -143,7 +115,6 @@ function printLog(method, logArr) {
   }
 }
 
-// ─── Головна функція ──────────────────────────────────────────────────────────
 function main(a, b) {
   console.log("\n════════════════════════════════════════════════════");
   console.log(" Рівень 2 — Знаходження коренів");
@@ -151,7 +122,6 @@ function main(a, b) {
   console.log(` Інтервал: [${a}, ${b}],  ε = ${EPSILON}`);
   console.log("════════════════════════════════════════════════════");
 
-  // Локалізація
   const intervals = locateRoots(a, b);
   if (intervals.length === 0) {
     console.log("\n  На заданому інтервалі коренів не знайдено.");
@@ -163,11 +133,9 @@ function main(a, b) {
     console.log(`    ${i + 1}. [${x1.toFixed(4)}, ${x2.toFixed(4)}]  f(a)=${f(x1).toFixed(4)}, f(b)=${f(x2).toFixed(4)}`);
   });
 
-  // Для кожного підінтервалу — три методи
   intervals.forEach(([ia, ib], idx) => {
     console.log(`\n  ┌─ Корінь #${idx + 1} на [${ia.toFixed(4)}, ${ib.toFixed(4)}] ─────────────────────`);
 
-    // Бісекція
     const bis = bisection(ia, ib);
     if (bis) {
       console.log(`\n  ● Метод половинчастого ділення (${bis.iter} ітерацій):`);
@@ -175,7 +143,6 @@ function main(a, b) {
       console.log(`    Корінь: x ≈ ${bis.root.toFixed(8)},  f(x) = ${f(bis.root).toExponential(4)}`);
     }
 
-    // Ньютон
     const newt = newton(ia, ib);
     if (newt) {
       console.log(`\n  ● Метод дотичних / Ньютона (${newt.iter} ітерацій):`);
@@ -185,7 +152,6 @@ function main(a, b) {
       console.log(`\n  ● Метод дотичних: не збігся на цьому підінтервалі`);
     }
 
-    // Хорди
     const ch = chord(ia, ib);
     if (ch) {
       console.log(`\n  ● Метод хорд (${ch.iter} ітерацій):`);
@@ -206,7 +172,6 @@ function main(a, b) {
   console.log("  ─────────────────────────────────────────────────────────\n");
 }
 
-// ─── Введення з клавіатури ────────────────────────────────────────────────────
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
 console.log("Знаходження коренів: x³ − 2cos(πx) = 0");
