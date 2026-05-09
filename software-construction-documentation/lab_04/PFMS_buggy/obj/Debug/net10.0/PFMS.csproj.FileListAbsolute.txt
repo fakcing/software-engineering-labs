@@ -1,0 +1,15 @@
+D:\Education\software-engineering-labs\software-construction-documentation\lab_04\PFMS_buggy\obj\Debug\net10.0\PFMS.GeneratedMSBuildEditorConfig.editorconfig
+D:\Education\software-engineering-labs\software-construction-documentation\lab_04\PFMS_buggy\obj\Debug\net10.0\PFMS.AssemblyInfoInputs.cache
+D:\Education\software-engineering-labs\software-construction-documentation\lab_04\PFMS_buggy\obj\Debug\net10.0\PFMS.AssemblyInfo.cs
+D:\Education\software-engineering-labs\software-construction-documentation\lab_04\PFMS_buggy\obj\Debug\net10.0\PFMS.csproj.CoreCompileInputs.cache
+D:\Education\software-engineering-labs\software-construction-documentation\lab_04\PFMS_buggy\obj\Debug\net10.0\PFMS.sourcelink.json
+D:\Education\software-engineering-labs\software-construction-documentation\lab_04\PFMS_buggy\bin\Debug\net10.0\PFMS.exe
+D:\Education\software-engineering-labs\software-construction-documentation\lab_04\PFMS_buggy\bin\Debug\net10.0\PFMS.deps.json
+D:\Education\software-engineering-labs\software-construction-documentation\lab_04\PFMS_buggy\bin\Debug\net10.0\PFMS.runtimeconfig.json
+D:\Education\software-engineering-labs\software-construction-documentation\lab_04\PFMS_buggy\bin\Debug\net10.0\PFMS.dll
+D:\Education\software-engineering-labs\software-construction-documentation\lab_04\PFMS_buggy\bin\Debug\net10.0\PFMS.pdb
+D:\Education\software-engineering-labs\software-construction-documentation\lab_04\PFMS_buggy\obj\Debug\net10.0\PFMS.dll
+D:\Education\software-engineering-labs\software-construction-documentation\lab_04\PFMS_buggy\obj\Debug\net10.0\refint\PFMS.dll
+D:\Education\software-engineering-labs\software-construction-documentation\lab_04\PFMS_buggy\obj\Debug\net10.0\PFMS.pdb
+D:\Education\software-engineering-labs\software-construction-documentation\lab_04\PFMS_buggy\obj\Debug\net10.0\PFMS.genruntimeconfig.cache
+D:\Education\software-engineering-labs\software-construction-documentation\lab_04\PFMS_buggy\obj\Debug\net10.0\ref\PFMS.dll

@@ -1,5 +1,11 @@
+using System.Text.Json.Serialization;
+
 namespace PFMS.Models;
 
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
+[JsonDerivedType(typeof(IdentityDocument),  "identity")]
+[JsonDerivedType(typeof(EducationDocument), "education")]
+[JsonDerivedType(typeof(ContractDocument),  "contract")]
 public abstract class Document
 {
     public int Id { get; set; }
