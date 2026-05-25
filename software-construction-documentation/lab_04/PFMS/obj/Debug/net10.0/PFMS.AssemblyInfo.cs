@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PFMS")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+627eb50747e5d48187c57e2e51896c9586d612a0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+978a912abe4abee43d2a9982fdcf3e9aa5716619")]
 [assembly: System.Reflection.AssemblyProductAttribute("PFMS")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PFMS")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

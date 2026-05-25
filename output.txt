@@ -1,4 +1,4 @@
-Частота букв у файлі: input.txt
+Частота букв у файлі: D:\Education\software-engineering-labs\input.txt
 ----------------------------------
 'a' -> 7
 'b' -> 2
