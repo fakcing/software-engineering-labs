@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Демо — Лабораторна робота №4</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      background: #fff;
+      padding: 28px 36px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 18px;
+      font-weight: 700;
+      border-bottom: 2px solid #1a1a1a;
+      padding-bottom: 6px;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #555;
+      margin: 22px 0 8px;
+      border-left: 3px solid #333;
+      padding-left: 8px;
+    }
+
+    .meta {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 20px;
+      line-height: 1.8;
+    }
+
+    /* архітектура шарів */
+    .layers {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-size: 11.5px;
+    }
+    .layer {
+      flex: 1;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 8px 10px;
+      text-align: center;
+    }
+    .layer .layer-name { font-weight: 700; font-size: 12px; margin-bottom: 4px; }
+    .layer.pl  { background: #fff0f0; border-color: #f06060; }
+    .layer.bll { background: #e8f4ff; border-color: #60a0f0; }
+    .layer.dal { background: #eaffea; border-color: #60c060; }
+
+    /* крок демо */
+    .step {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      page-break-inside: avoid;
+      overflow: hidden;
+    }
+    .step-header {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      background: #f4f4f4;
+      padding: 7px 12px;
+      border-bottom: 1px solid #ddd;
+    }
+    .step-num   { font-weight: 700; font-size: 12px; color: #888; min-width: 20px; }
+    .step-title { font-weight: 600; font-size: 13px; }
+    .step-badge {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      padding: 2px 7px; border-radius: 10px; margin-left: auto;
+    }
+    .badge-get    { background: #61affe; color: #fff; }
+    .badge-post   { background: #49cc90; color: #fff; }
+    .badge-put    { background: #fca130; color: #fff; }
+    .badge-patch  { background: #50e3c2; color: #1a1a1a; }
+    .badge-delete { background: #f93e3e; color: #fff; }
+
+    .step-body {
+      padding: 10px 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .step-body.wide { grid-template-columns: 1fr; }
+
+    .label {
+      font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.4px; color: #888;
+      margin-bottom: 4px; font-weight: 600;
+    }
+
+    .say {
+      background: #fafafa;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      padding: 8px 10px;
+      font-style: italic;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .code {
+      background: #1e1e1e;
+      border-radius: 4px;
+      padding: 8px 10px;
+      color: #d4d4d4;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 11.5px;
+      line-height: 1.7;
+    }
+    .code .method-get    { color: #61affe; font-weight: bold; }
+    .code .method-post   { color: #49cc90; font-weight: bold; }
+    .code .method-put    { color: #fca130; font-weight: bold; }
+    .code .method-patch  { color: #50e3c2; font-weight: bold; }
+    .code .method-delete { color: #f93e3e; font-weight: bold; }
+    .code .url  { color: #9cdcfe; }
+    .code .key  { color: #9cdcfe; }
+    .code .val  { color: #ce9178; }
+    .code .num  { color: #b5cea8; }
+    .code .bool { color: #569cd6; }
+    .code .cm   { color: #6a9955; font-size: 10px; }
+    .code .resp { color: #4ec9b0; }
+    .code .err  { color: #f44747; }
+
+    .tip {
+      background: #fffbea;
+      border: 1px solid #f0d060;
+      border-radius: 4px;
+      padding: 7px 10px;
+      font-size: 12px;
+      color: #5a4a00;
+      margin: 0 14px 10px;
+    }
+    .tip strong { color: #3a3000; }
+
+    /* запуск */
+    .launch {
+      background: #1e1e1e;
+      border-radius: 6px;
+      padding: 10px 14px;
+      color: #d4d4d4;
+      font-family: "Consolas", monospace;
+      font-size: 12px;
+      line-height: 1.9;
+      margin-bottom: 16px;
+    }
+    .launch .cm  { color: #6a9955; }
+    .launch .cmd { color: #9cdcfe; }
+
+    /* питання */
+    .qa {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      page-break-inside: avoid;
+      overflow: hidden;
+    }
+    .qa-q {
+      background: #fff8e8;
+      border-bottom: 1px solid #f0d060;
+      padding: 7px 12px;
+      font-weight: 600;
+      font-size: 12.5px;
+      display: flex;
+      gap: 8px;
+    }
+    .qa-num { font-size: 11px; color: #999; font-weight: 700; min-width: 22px; padding-top: 1px; }
+    .qa-a {
+      padding: 9px 14px;
+      font-size: 12.5px;
+      line-height: 1.65;
+      color: #1a1a1a;
+    }
+    .qa-a strong { color: #1a3a6e; }
+    .qa-a .ref {
+      font-family: "Consolas", monospace;
+      font-size: 11px;
+      background: #f0f0f0;
+      border-radius: 3px;
+      padding: 1px 5px;
+      color: #333;
+    }
+
+    @media print {
+      body { padding: 14px 20px; font-size: 12px; }
+      h1   { font-size: 16px; }
+      .code { font-size: 11px; }
+      .step, .qa { margin-bottom: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<h1>Лабораторна робота №4 — Демонстраційний сценарій</h1>
+
+<div class="meta">
+  <strong>Тема:</strong> Рівень представлення (PL). REST Web API на Express.js.<br>
+  <strong>Варіант:</strong> 2 &nbsp;|&nbsp; <strong>Стек:</strong> TypeScript, Express, TypeORM, sql.js<br>
+  <strong>Запуск:</strong> <code>npm run seed</code> → <code>npm run dev</code> → Postman
+</div>
+
+<div class="layers">
+  <div class="layer pl">
+    <div class="layer-name">PL (src/pl/)</div>
+    server.ts · container.ts<br>
+    controllers/ · models/ · mappers/<br>
+    <em>HTTP, маршрутизація, JSON</em>
+  </div>
+  <div class="layer bll">
+    <div class="layer-name">BLL (src/bll/)</div>
+    ContentService · StorageService<br>
+    dto/ · mappers/<br>
+    <em>Бізнес-логіка, валідація</em>
+  </div>
+  <div class="layer dal">
+    <div class="layer-name">DAL (src/dal/)</div>
+    UnitOfWork · repositories/<br>
+    entities/ · AppDataSource<br>
+    <em>TypeORM, SQLite</em>
+  </div>
+</div>
+
+<div class="launch">
+  <span class="cm"># Термінал — запустити перед демо</span><br>
+  <span class="cmd">cd architecture-software/lab_04</span><br>
+  <span class="cmd">npm run seed</span>&nbsp;&nbsp;<span class="cm"># заповнити БД (один раз)</span><br>
+  <span class="cmd">npm run dev</span>&nbsp;&nbsp;&nbsp;<span class="cm"># сервер на http://localhost:3000</span>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<h2>Демо в Postman — крок за кроком</h2>
+
+<div class="step">
+  <div class="step-header">
+    <span class="step-num">01</span>
+    <span class="step-title">Отримати всі сховища</span>
+    <span class="step-badge badge-get">GET</span>
+  </div>
+  <div class="step-body">
+    <div>
+      <div class="label">Що казати</div>
+      <div class="say">
+        "Починаю з GET-запиту — це читання без тіла запиту. Сервер повертає масив JSON
+        з усіма сховищами. PL-шар через <code>StorageController</code> викликає
+        <code>StorageService.getAll()</code>, маппить DTO у Response-модель і повертає
+        статус 200."
+      </div>
+    </div>
+    <div>
+      <div class="label">Postman</div>
+      <div class="code">
+        <span class="method-get">GET</span> <span class="url">http://localhost:3000/api/storages</span><br><br>
+        <span class="cm">← відповідь 200 OK:</span><br>
+        <span class="resp">[</span><br>
+        &nbsp;{ <span class="key">"id"</span>: <span class="num">1</span>, <span class="key">"name"</span>: <span class="val">"Основний сервер"</span>,<br>
+        &nbsp;&nbsp;&nbsp;<span class="key">"isActive"</span>: <span class="bool">true</span>, <span class="key">"itemCount"</span>: <span class="num">4</span> },<br>
+        &nbsp;...<br>
+        <span class="resp">]</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-header">
+    <span class="step-num">02</span>
+    <span class="step-title">Отримати сховище за ID</span>
+    <span class="step-badge badge-get">GET</span>
+  </div>
+  <div class="step-body">
+    <div>
+      <div class="label">Що казати</div>
+      <div class="say">
+        "ID передається як route-параметр у шляху — <code>/api/storages/1</code>.
+        Контролер витягує його через <code>req.params.id</code> і передає в сервіс.
+        Якщо сховища не існує — BLL кидає виняток, контролер ловить його і повертає
+        статус 404."
+      </div>
+    </div>
+    <div>
+      <div class="label">Postman</div>
+      <div class="code">
+        <span class="method-get">GET</span> <span class="url">http://localhost:3000/api/storages/1</span><br><br>
+        <span class="cm">← 200 OK: один об'єкт</span><br>
+        <span class="resp">{</span> <span class="key">"id"</span>: <span class="num">1</span>, <span class="key">"name"</span>: <span class="val">"Основний сервер"</span>, ... <span class="resp">}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-header">
+    <span class="step-num">03</span>
+    <span class="step-title">Створити сховище</span>
+    <span class="step-badge badge-post">POST</span>
+  </div>
+  <div class="step-body">
+    <div>
+      <div class="label">Що казати</div>
+      <div class="say">
+        "POST — створення ресурсу. Тіло запиту — JSON з полями <code>name</code> і
+        <code>location</code>. Сервер повертає 201 Created з об'єктом нового сховища.
+        BLL перевіряє унікальність назви — якщо вже існує, повернеться 400 з повідомленням."
+      </div>
+    </div>
+    <div>
+      <div class="label">Postman — Body → raw → JSON</div>
+      <div class="code">
+        <span class="method-post">POST</span> <span class="url">http://localhost:3000/api/storages</span><br><br>
+        {<br>
+        &nbsp;<span class="key">"name"</span>: <span class="val">"Локальний диск"</span>,<br>
+        &nbsp;<span class="key">"location"</span>: <span class="val">"D:/library"</span><br>
+        }<br><br>
+        <span class="cm">← 201 Created</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-header">
+    <span class="step-num">04</span>
+    <span class="step-title">Отримати весь контент</span>
+    <span class="step-badge badge-get">GET</span>
+  </div>
+  <div class="step-body">
+    <div>
+      <div class="label">Що казати</div>
+      <div class="say">
+        "Той самий патерн що і для сховищ. Повертається масив з усіма елементами
+        контенту — книги, відео, аудіо, документи. Кожен елемент містить вкладений
+        об'єкт <code>storage</code> — це результат JOIN через TypeORM relations у DAL."
+      </div>
+    </div>
+    <div>
+      <div class="label">Postman</div>
+      <div class="code">
+        <span class="method-get">GET</span> <span class="url">http://localhost:3000/api/content</span><br><br>
+        <span class="cm">← 200 OK, масив з 9 елементів</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-header">
+    <span class="step-num">05</span>
+    <span class="step-title">Пошук контенту — query-параметри</span>
+    <span class="step-badge badge-get">GET</span>
+  </div>
+  <div class="step-body">
+    <div>
+      <div class="label">Що казати</div>
+      <div class="say">
+        "Параметри пошуку передаються у query string після знаку <code>?</code>.
+        Всі параметри необов'язкові — контролер читає їх з <code>req.query</code>
+        і передає в сервіс. Пошук по тексту — case-insensitive через ILike в DAL."
+      </div>
+    </div>
+    <div>
+      <div class="label">Postman — вкладка Params</div>
+      <div class="code">
+        <span class="method-get">GET</span> <span class="url">/api/content/search?author=Martin</span><br>
+        <span class="method-get">GET</span> <span class="url">/api/content/search?type=book</span><br>
+        <span class="method-get">GET</span> <span class="url">/api/content/search?isAvailable=true</span><br>
+        <span class="method-get">GET</span> <span class="url">/api/content/search?type=book&isAvailable=true</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-header">
+    <span class="step-num">06</span>
+    <span class="step-title">Створити контент (книга)</span>
+    <span class="step-badge badge-post">POST</span>
+  </div>
+  <div class="step-body">
+    <div>
+      <div class="label">Що казати</div>
+      <div class="say">
+        "PL-шар отримує <code>CreateContentItemRequest</code> з тіла запиту,
+        маппить його у <code>CreateContentItemDto</code> через PL-маппер,
+        передає в BLL. BLL перевіряє відповідність формату типу —
+        якщо передати <code>mp3</code> для книги, повернеться 400."
+      </div>
+    </div>
+    <div>
+      <div class="label">Postman — Body → raw → JSON</div>
+      <div class="code">
+        <span class="method-post">POST</span> <span class="url">http://localhost:3000/api/content</span><br><br>
+        {<br>
+        &nbsp;<span class="key">"title"</span>: <span class="val">"Refactoring"</span>,<br>
+        &nbsp;<span class="key">"author"</span>: <span class="val">"Martin Fowler"</span>,<br>
+        &nbsp;<span class="key">"type"</span>: <span class="val">"book"</span>,<br>
+        &nbsp;<span class="key">"format"</span>: <span class="val">"pdf"</span>,<br>
+        &nbsp;<span class="key">"storageId"</span>: <span class="num">1</span>,<br>
+        &nbsp;<span class="key">"year"</span>: <span class="num">2018</span>,<br>
+        &nbsp;<span class="key">"pageCount"</span>: <span class="num">448</span><br>
+        }<br><br>
+        <span class="cm">← 201 Created</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-header">
+    <span class="step-num">07</span>
+    <span class="step-title">Показати валідацію — неправильний формат</span>
+    <span class="step-badge badge-post">POST</span>
+  </div>
+  <div class="step-body">
+    <div>
+      <div class="label">Що казати</div>
+      <div class="say">
+        "Навмисно передаю <code>format: mp3</code> для книги.
+        BLL відкидає запит ще до запису в БД. Контролер ловить виняток і
+        повертає <code>400 Bad Request</code> з текстом помилки у полі
+        <code>error</code>. Це демонструє, що валідація в BLL, а не в контролері."
+      </div>
+    </div>
+    <div>
+      <div class="label">Postman</div>
+      <div class="code">
+        <span class="method-post">POST</span> <span class="url">http://localhost:3000/api/content</span><br><br>
+        { <span class="key">"type"</span>: <span class="val">"book"</span>, <span class="key">"format"</span>: <span class="val">"mp3"</span>, ... }<br><br>
+        <span class="cm">← 400 Bad Request:</span><br>
+        <span class="err">{ "error": "Формат \"mp3\" не підходить для типу \"book\"" }</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-header">
+    <span class="step-num">08</span>
+    <span class="step-title">Оновити контент</span>
+    <span class="step-badge badge-put">PUT</span>
+  </div>
+  <div class="step-body">
+    <div>
+      <div class="label">Що казати</div>
+      <div class="say">
+        "PUT — оновлення існуючого ресурсу. ID у шляху, поля для зміни у тілі.
+        Поля необов'язкові — передаєш тільки те що хочеш змінити.
+        Контролер витягує ID з <code>req.params</code>, тіло з <code>req.body</code>,
+        і передає обидва в маппер."
+      </div>
+    </div>
+    <div>
+      <div class="label">Postman — Body → raw → JSON</div>
+      <div class="code">
+        <span class="method-put">PUT</span> <span class="url">http://localhost:3000/api/content/10</span><br><br>
+        {<br>
+        &nbsp;<span class="key">"year"</span>: <span class="num">2019</span>,<br>
+        &nbsp;<span class="key">"genre"</span>: <span class="val">"Software Engineering"</span><br>
+        }<br><br>
+        <span class="cm">← 200 OK з оновленим об'єктом</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-header">
+    <span class="step-num">09</span>
+    <span class="step-title">Змінити доступність</span>
+    <span class="step-badge badge-patch">PATCH</span>
+  </div>
+  <div class="step-body">
+    <div>
+      <div class="label">Що казати</div>
+      <div class="say">
+        "PATCH — часткове оновлення конкретного поля.
+        На відміну від PUT, тут змінюється тільки один атрибут — <code>isAvailable</code>.
+        Окремий ендпоінт <code>/availability</code> чітко виражає намір операції —
+        це REST-практика іменованих дій."
+      </div>
+    </div>
+    <div>
+      <div class="label">Postman — Body → raw → JSON</div>
+      <div class="code">
+        <span class="method-patch">PATCH</span> <span class="url">/api/content/7/availability</span><br><br>
+        { <span class="key">"isAvailable"</span>: <span class="bool">false</span> }<br><br>
+        <span class="cm">← 200 OK, isAvailable тепер false</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-header">
+    <span class="step-num">10</span>
+    <span class="step-title">Деактивувати сховище</span>
+    <span class="step-badge badge-patch">PATCH</span>
+  </div>
+  <div class="step-body">
+    <div>
+      <div class="label">Що казати</div>
+      <div class="say">
+        "PATCH без тіла — дія повністю описана в URL. <code>/deactivate</code>
+        — це іменована дія, яка просто встановлює <code>isActive: false</code>.
+        Не потрібно передавати тіло, бо операція однозначна."
+      </div>
+    </div>
+    <div>
+      <div class="label">Postman</div>
+      <div class="code">
+        <span class="method-patch">PATCH</span> <span class="url">/api/storages/3/deactivate</span><br><br>
+        <span class="cm">← тіло не потрібне</span><br>
+        <span class="cm">← 200 OK, isActive тепер false</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-header">
+    <span class="step-num">11</span>
+    <span class="step-title">Видалити контент і перевірити 404</span>
+    <span class="step-badge badge-delete">DELETE</span>
+  </div>
+  <div class="step-body">
+    <div>
+      <div class="label">Що казати</div>
+      <div class="say">
+        "DELETE повертає <code>204 No Content</code> — успіх без тіла відповіді,
+        бо ресурс більше не існує. Якщо тепер запитати видалений елемент через
+        GET — отримаємо <code>404 Not Found</code>. Це демонструє коди статусів."
+      </div>
+    </div>
+    <div>
+      <div class="label">Postman</div>
+      <div class="code">
+        <span class="method-delete">DELETE</span> <span class="url">/api/content/10</span><br>
+        <span class="cm">← 204 No Content</span><br><br>
+        <span class="method-get">GET</span> <span class="url">/api/content/10</span><br>
+        <span class="cm">← 404 Not Found:</span><br>
+        <span class="err">{ "error": "Контент #10 не знайдено" }</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-header">
+    <span class="step-num">12</span>
+    <span class="step-title">Захист цілісності — видалення сховища з контентом</span>
+    <span class="step-badge badge-delete">DELETE</span>
+  </div>
+  <div class="step-body">
+    <div>
+      <div class="label">Що казати</div>
+      <div class="say">
+        "Спробую видалити сховище ID 1, в якому є 4 елементи.
+        BLL перевіряє це і кидає виняток — контролер ловить його і
+        повертає 400. Бізнес-правило спрацьовує на рівні сервісу,
+        а не на рівні HTTP."
+      </div>
+    </div>
+    <div>
+      <div class="label">Postman</div>
+      <div class="code">
+        <span class="method-delete">DELETE</span> <span class="url">/api/storages/1</span><br><br>
+        <span class="cm">← 400 Bad Request:</span><br>
+        <span class="err">{ "error": "Не можна видалити — в сховищі 4 елемент(ів)" }</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════ -->
+<h1 style="margin-top:28px;">Контрольні питання — повні відповіді</h1>
+<div class="meta" style="margin-bottom:16px;">Відповіді прив'язані до коду проекту.</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">1.</span> Що таке API? Що таке WebAPI?</div>
+  <div class="qa-a">
+    <strong>API (Application Programming Interface)</strong> — це контракт між двома програмами: набір функцій, методів або ендпоінтів, через які одна програма може взаємодіяти з іншою, не знаючи її внутрішньої реалізації.<br><br>
+    <strong>Web API</strong> — це API, доступне через мережу за протоколом HTTP. Клієнт надсилає HTTP-запит, сервер повертає відповідь у форматі JSON або XML.<br><br>
+    У проекті: <span class="ref">src/pl/server.ts</span> реєструє маршрути <span class="ref">/api/content</span> і <span class="ref">/api/storages</span> — це і є Web API. Будь-який клієнт (браузер, Postman, мобільний додаток) може звертатись до нього.
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">2.</span> Які задачі вирішує та в чому особливості рівня представлення PL?</div>
+  <div class="qa-a">
+    <strong>Задачі PL:</strong><br>
+    — Приймати HTTP-запити і повертати HTTP-відповіді;<br>
+    — Десеріалізувати вхідні дані (JSON → об'єкт) і серіалізувати вихідні (об'єкт → JSON);<br>
+    — Маршрутизувати запити до потрібного контролера;<br>
+    — Перекладати винятки BLL у відповідні HTTP статус-коди (400, 404, 500);<br>
+    — Маппити Request-моделі у DTO для BLL і назад.<br><br>
+    <strong>Особливість:</strong> PL не містить бізнес-логіки — він лише транспортний шар. У проекті <span class="ref">ContentController</span> тільки викликає сервіс і маппить результат, жодних перевірок у ньому немає.
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">3.</span> Які типові шаблони проектування існують для реалізації рівня представлення PL?</div>
+  <div class="qa-a">
+    — <strong>MVC (Model-View-Controller)</strong> — Controller обробляє запит, Model містить дані, View рендерить HTML. Класичний серверний рендеринг.<br>
+    — <strong>MVP (Model-View-Presenter)</strong> — View пасивна, Presenter містить логіку представлення, тестується без UI.<br>
+    — <strong>MVVM (Model-View-ViewModel)</strong> — ViewModel має двостороннє binding з View. Використовується у WPF, Angular, Vue.<br>
+    — <strong>REST Controller (без View)</strong> — те що в цьому проекті. Контролер повертає JSON замість HTML, клієнт сам рендерить.<br><br>
+    У проекті реалізовано патерн <strong>REST Controller</strong> — <span class="ref">ContentController</span> і <span class="ref">StorageController</span> без жодного View.
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">4.</span> В чому особливість та як реалізується шаблон MVC?</div>
+  <div class="qa-a">
+    <strong>MVC</strong> розділяє відповідальності на три компоненти:<br><br>
+    — <strong>Model</strong> — дані і бізнес-логіка (відповідає BLL + DAL у цьому проекті);<br>
+    — <strong>View</strong> — шаблон для рендерингу HTML (у Web API замінюється JSON-серіалізацією);<br>
+    — <strong>Controller</strong> — приймає запит, викликає Model, передає результат у View.<br><br>
+    <strong>Особливість:</strong> View і Controller залежать від Model, але Model не знає про View — це однонаправлена залежність.<br><br>
+    <strong>Реалізація:</strong> В ASP.NET MVC Controller успадковує <span class="ref">Controller</span>, методи позначені атрибутами <span class="ref">[HttpGet]</span>, <span class="ref">[HttpPost]</span>. В Express аналогічно — router.get(), router.post() у <span class="ref">ContentController.ts</span>.
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">5.</span> В чому особливість та як реалізується шаблон MVP?</div>
+  <div class="qa-a">
+    <strong>MVP</strong> — розвиток MVC для UI-додатків (WinForms, Android):<br><br>
+    — <strong>Model</strong> — дані і бізнес-логіка;<br>
+    — <strong>View</strong> — пасивна, тільки відображає і делегує дії Presenter через інтерфейс (<span class="ref">IView</span>);<br>
+    — <strong>Presenter</strong> — містить логіку представлення, підписується на події View, оновлює її через інтерфейс.<br><br>
+    <strong>Ключова відмінність від MVC:</strong> View нічого не знає про Model — Presenter є посередником. View тестується через mock-інтерфейс.<br><br>
+    <strong>Реалізація:</strong> View реалізує інтерфейс <span class="ref">IView</span>, Presenter отримує його через конструктор. При натисканні кнопки View викликає <span class="ref">presenter.onButtonClick()</span>, а не сама обробляє логіку.
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">6.</span> В чому особливість та як реалізується шаблон MVVM?</div>
+  <div class="qa-a">
+    <strong>MVVM</strong> — патерн для UI з двостороннім зв'язуванням даних (Angular, Vue, WPF):<br><br>
+    — <strong>Model</strong> — бізнес-дані і логіка;<br>
+    — <strong>View</strong> — HTML-шаблон з binding-виразами (<span class="ref">{{ title }}</span>, <span class="ref">[(ngModel)]</span>);<br>
+    — <strong>ViewModel</strong> — містить стан і команди, реалізує <span class="ref">INotifyPropertyChanged</span>. View автоматично оновлюється при зміні ViewModel.<br><br>
+    <strong>Ключова особливість:</strong> двостороннє binding — зміна у View оновлює ViewModel і навпаки. Presenter в MVP оновлює View вручну, у MVVM це відбувається автоматично через механізм binding.
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">7.</span> Опишіть весь шлях обробки запиту від браузера до рівня представлення (включно) з MVC.</div>
+  <div class="qa-a">
+    <strong>1.</strong> Браузер відправляє HTTP-запит: <span class="ref">GET /api/content/1</span><br>
+    <strong>2.</strong> TCP/IP доставляє пакет до сервера на порт 3000<br>
+    <strong>3.</strong> Express (веб-сервер) приймає запит<br>
+    <strong>4.</strong> Middleware pipeline: <span class="ref">cors()</span> → <span class="ref">express.json()</span> (парсинг тіла)<br>
+    <strong>5.</strong> Маршрутизатор порівнює URL з зареєстрованими маршрутами → знаходить <span class="ref">GET /api/content/:id</span><br>
+    <strong>6.</strong> Викликається обробник у <span class="ref">ContentController</span><br>
+    <strong>7.</strong> Контролер витягує <span class="ref">id</span> з <span class="ref">req.params</span>, викликає <span class="ref">service.getById(id)</span><br>
+    <strong>8.</strong> BLL повертає DTO → PL-маппер конвертує у Response-модель<br>
+    <strong>9.</strong> <span class="ref">res.json(response)</span> → Express серіалізує у JSON і відправляє HTTP-відповідь 200<br>
+    <strong>10.</strong> Браузер отримує JSON
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">8.</span> Чим відрізняється ASP.NET MVC та ASP.NET WebAPI?</div>
+  <div class="qa-a">
+    <strong>ASP.NET MVC</strong> — повертає HTML-сторінки через View (Razor). Призначений для веб-додатків з серверним рендерингом. Контролер успадковує <span class="ref">Controller</span>, метод повертає <span class="ref">IActionResult</span> → View.<br><br>
+    <strong>ASP.NET Web API</strong> — повертає JSON/XML. Призначений для API, якими користуються клієнтські додатки (SPA, мобільні). Контролер успадковує <span class="ref">ControllerBase</span> (без View). Атрибут <span class="ref">[ApiController]</span> додає автоматичну валідацію моделі.<br><br>
+    В .NET 6+ обидва об'єднані в один фреймворк. Аналог у проекті: Express з <span class="ref">res.json()</span> — це Web API стиль.
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">9.</span> Чим відрізняється WebAPI (як рівень представлення) від усіх інших клієнт-серверних застосувань?</div>
+  <div class="qa-a">
+    <strong>Традиційний веб-додаток</strong> — сервер сам рендерить HTML і повертає готову сторінку. Клієнт — тільки браузер.<br><br>
+    <strong>Web API</strong> — сервер повертає тільки дані (JSON). Рендеринг — відповідальність клієнта. Клієнтом може бути браузер (React/Angular), мобільний додаток, інший сервіс, Postman.<br><br>
+    <strong>Ключові відмінності:</strong><br>
+    — Немає стану сесії (stateless) — кожен запит самодостатній;<br>
+    — Немає прив'язки до конкретного клієнта — один API обслуговує усіх;<br>
+    — Формат відповіді — JSON, а не HTML;<br>
+    — Версіонування через URL (<span class="ref">/api/v1/</span>) або заголовки.
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">10.</span> Які види серверів ви знаєте?</div>
+  <div class="qa-a">
+    — <strong>Веб-сервер</strong> — обробляє HTTP-запити, роздає статичні файли (Apache, Nginx);<br>
+    — <strong>Сервер застосувань</strong> — виконує бізнес-логіку, динамічно генерує відповіді (Node.js + Express, Tomcat, IIS);<br>
+    — <strong>База даних</strong> — зберігає і повертає дані (PostgreSQL, MySQL, SQLite);<br>
+    — <strong>Файловий сервер</strong> — зберігає файли (FTP, S3);<br>
+    — <strong>Поштовий сервер</strong> — обробляє email (SMTP, IMAP);<br>
+    — <strong>Проксі-сервер</strong> — посередник між клієнтом і сервером (Nginx як reverse proxy);<br>
+    — <strong>DNS-сервер</strong> — перетворює домени в IP-адреси.
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">11.</span> Що таке веб-сервер і які його основні задачі? Наведіть приклади.</div>
+  <div class="qa-a">
+    <strong>Веб-сервер</strong> — програмне забезпечення, яке приймає HTTP/HTTPS запити і повертає відповіді.<br><br>
+    <strong>Основні задачі:</strong><br>
+    — Обробка HTTP-запитів і формування відповідей;<br>
+    — Роздача статичних файлів (HTML, CSS, JS, зображення);<br>
+    — SSL/TLS термінація (HTTPS);<br>
+    — Логування запитів;<br>
+    — Балансування навантаження (Nginx).<br><br>
+    <strong>Приклади:</strong> Apache HTTP Server, Nginx, Microsoft IIS.<br>
+    У проекті роль веб-сервера виконує <strong>Express.js</strong> — він слухає порт 3000 і приймає запити.
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">12.</span> Що таке сервер застосувань і які його основні задачі? Наведіть приклади.</div>
+  <div class="qa-a">
+    <strong>Сервер застосувань</strong> — середовище виконання, яке виконує бізнес-логіку додатку, обробляє транзакції, підключається до БД.<br><br>
+    <strong>Основні задачі:</strong><br>
+    — Виконання коду застосунку (наш TypeScript/Node.js код);<br>
+    — Управління з'єднаннями з БД (connection pool);<br>
+    — Обробка сесій і автентифікація;<br>
+    — Управління транзакціями.<br><br>
+    <strong>Приклади:</strong> Node.js, Apache Tomcat (Java), WildFly, IIS (ASP.NET).<br>
+    У проекті: <strong>Node.js</strong> — сервер застосувань, Express — веб-фреймворк поверх нього. Часто ці ролі суміщені в одному процесі.
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">13.</span> Поясніть протокол HTTP та його роботу.</div>
+  <div class="qa-a">
+    <strong>HTTP (HyperText Transfer Protocol)</strong> — протокол прикладного рівня для передачі даних між клієнтом і сервером поверх TCP/IP.<br><br>
+    <strong>Як працює:</strong><br>
+    1. Клієнт встановлює TCP-з'єднання з сервером (порт 80 або 443 для HTTPS);<br>
+    2. Відправляє HTTP-запит: рядок запиту (<span class="ref">GET /api/content HTTP/1.1</span>), заголовки (<span class="ref">Content-Type: application/json</span>), тіло (для POST/PUT);<br>
+    3. Сервер обробляє і повертає відповідь: статус-рядок (<span class="ref">HTTP/1.1 200 OK</span>), заголовки, тіло (JSON);<br>
+    4. З'єднання закривається (HTTP/1.0) або залишається (keep-alive у HTTP/1.1).<br><br>
+    <strong>Особливість:</strong> HTTP — <em>stateless</em>, кожен запит незалежний. Стан зберігається через cookies або токени.
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">14.</span> В чому різниця між основними HTTP методами: GET, POST, PUT, DELETE?</div>
+  <div class="qa-a">
+    — <strong>GET</strong> — отримати ресурс. Без тіла запиту. Ідемпотентний (повторний виклик = той самий результат). <span class="ref">GET /api/content/1</span><br><br>
+    — <strong>POST</strong> — створити новий ресурс. Тіло містить дані. Не ідемпотентний (повторний виклик створює ще один ресурс). Повертає 201. <span class="ref">POST /api/content</span><br><br>
+    — <strong>PUT</strong> — оновити існуючий ресурс повністю. Ідемпотентний. <span class="ref">PUT /api/content/10</span><br><br>
+    — <strong>PATCH</strong> — частково оновити ресурс (одне поле). <span class="ref">PATCH /api/content/7/availability</span><br><br>
+    — <strong>DELETE</strong> — видалити ресурс. Ідемпотентний. Повертає 204. <span class="ref">DELETE /api/content/10</span>
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">15.</span> Поясніть основні групи статус-кодів HTTP.</div>
+  <div class="qa-a">
+    — <strong>1xx — Інформаційні:</strong> запит прийнято, обробка продовжується (рідко використовуються).<br><br>
+    — <strong>2xx — Успіх:</strong> <span class="ref">200 OK</span> (запит виконано), <span class="ref">201 Created</span> (ресурс створено), <span class="ref">204 No Content</span> (успіх без тіла — наш DELETE).<br><br>
+    — <strong>3xx — Перенаправлення:</strong> <span class="ref">301 Moved Permanently</span>, <span class="ref">302 Found</span>.<br><br>
+    — <strong>4xx — Помилка клієнта:</strong> <span class="ref">400 Bad Request</span> (невірні дані — наша валідація BLL), <span class="ref">404 Not Found</span> (ресурс не знайдено), <span class="ref">401 Unauthorized</span>, <span class="ref">403 Forbidden</span>.<br><br>
+    — <strong>5xx — Помилка сервера:</strong> <span class="ref">500 Internal Server Error</span> (необроблений виняток).
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">16.</span> В чому полягає особливість реалізації DI для ASP.NET MVC чи WebAPI застосувань?</div>
+  <div class="qa-a">
+    В ASP.NET вбудований IoC-контейнер: сервіси реєструються у <span class="ref">Program.cs</span> через <span class="ref">builder.Services.AddScoped&lt;IService, Service&gt;()</span>, а фреймворк сам ін'єктує їх у конструктор контролера при кожному запиті.<br><br>
+    <strong>У цьому проекті (Express)</strong> вбудованого DI немає, тому реалізований вручну через <span class="ref">container.ts</span>: функція <span class="ref">createContainer()</span> створює UnitOfWork, передає у сервіси, а сервіси передаються у контролери при реєстрації роутерів у <span class="ref">server.ts</span>.<br><br>
+    <strong>Перевага DI:</strong> контролер не знає як створюється сервіс, залежить тільки від інтерфейсу — легко замінити реалізацію або підставити mock у тестах.
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">17.</span> Поясніть особливості використання Postman, Fiddler та подібних інструментів.</div>
+  <div class="qa-a">
+    <strong>Postman</strong> — GUI-клієнт для тестування HTTP API:<br>
+    — Відправляє будь-які HTTP-запити (GET, POST, PUT, DELETE, PATCH);<br>
+    — Дозволяє задавати заголовки, тіло (JSON, form-data), query-параметри;<br>
+    — Зберігає запити у колекції для повторного використання;<br>
+    — Показує відповідь: статус-код, заголовки, тіло, час відповіді.<br><br>
+    <strong>Fiddler</strong> — HTTP-проксі для перехоплення трафіку:<br>
+    — Показує всі HTTP-запити що йдуть з браузера/додатку;<br>
+    — Дозволяє модифікувати запити і відповіді "на льоту";<br>
+    — Корисний для дебагу та аналізу мережевого трафіку.<br><br>
+    <strong>Різниця:</strong> Postman — для ручного тестування API. Fiddler — для перехоплення і аналізу трафіку.
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">18.</span> В чому різниця між веб-застосуванням та веб-сервісом?</div>
+  <div class="qa-a">
+    <strong>Веб-застосування</strong> — призначене для людей. Повертає HTML-сторінки, має UI, взаємодія через браузер. Приклад: інтернет-магазин, соцмережа.<br><br>
+    <strong>Веб-сервіс</strong> — призначений для програм. Повертає структуровані дані (JSON, XML), немає UI, взаємодія machine-to-machine. Приклад: наш <span class="ref">/api/content</span>.<br><br>
+    <strong>Практично:</strong> один і той самий бекенд може бути і веб-застосуванням (якщо є сторінки), і веб-сервісом (якщо є API). Сучасна архітектура зазвичай: окремий фронтенд (SPA) + окремий веб-сервіс (REST API).
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">19.</span> Що таке REST?</div>
+  <div class="qa-a">
+    <strong>REST (Representational State Transfer)</strong> — архітектурний стиль для побудови розподілених систем, сформульований Roy Fielding у 2000 році.<br><br>
+    <strong>Основні принципи:</strong><br>
+    — <strong>Stateless</strong> — сервер не зберігає стан між запитами;<br>
+    — <strong>Client-Server</strong> — чітке розділення клієнта і сервера;<br>
+    — <strong>Uniform Interface</strong> — єдиний інтерфейс: ресурси ідентифікуються URL, дії — HTTP-методами;<br>
+    — <strong>Cacheable</strong> — відповіді можна кешувати;<br>
+    — <strong>Layered System</strong> — клієнт не знає скільки шарів між ним і даними.<br><br>
+    У проекті: <span class="ref">/api/content</span> — ресурс, <span class="ref">GET/POST/PUT/DELETE</span> — дії над ним. Це REST.
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">20.</span> В чому відмінність REST від RPC та SOAP?</div>
+  <div class="qa-a">
+    <strong>REST</strong> — ресурсо-орієнтований. URL описує ресурс (<span class="ref">/content/1</span>), HTTP-метод — дію. Легкий, JSON, без схеми.<br><br>
+    <strong>RPC (Remote Procedure Call)</strong> — дієво-орієнтований. URL описує дію (<span class="ref">/getContentById</span>, <span class="ref">/deleteContent</span>). Завжди POST. Приклад: gRPC, JSON-RPC.<br><br>
+    <strong>SOAP</strong> — протокол на XML. Суворо типізований через WSDL-схему. Підтримує транзакції і безпеку (WS-Security). Важкий, але надійний для enterprise.<br><br>
+    <strong>Порівняння:</strong> REST — простий і гнучкий, добре для публічних API. SOAP — складний, але з гарантіями, добре для банків і корпоративних систем. RPC — коли важливіша дія, ніж ресурс (gRPC — швидкий для мікросервісів).
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">21.</span> Як побудована маршрутизація в ASP.NET WebAPI та як вона працює?</div>
+  <div class="qa-a">
+    В ASP.NET WebAPI маршрутизація визначається через атрибути або конвенцію.<br><br>
+    <strong>Attribute routing:</strong> <span class="ref">[Route("api/content")]</span> на контролері, <span class="ref">[HttpGet("{id}")]</span> на методі.<br><br>
+    <strong>Як працює:</strong> при старті додатку всі маршрути реєструються у таблиці маршрутів. При запиті URL порівнюється з шаблонами — знаходиться перший збіг, визначається контролер і метод, параметри витягуються з URL, query або тіла.<br><br>
+    <strong>В Express (цей проект):</strong> аналогічно — <span class="ref">router.get("/:id", handler)</span> реєструє шаблон. <span class="ref">:id</span> — route parameter. Express проходить по зареєстрованих маршрутах зверху вниз і викликає перший збіг. Саме тому <span class="ref">/search</span> зареєстрований <em>до</em> <span class="ref">/:id</span> — інакше "search" розпарсилось би як id.
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q"><span class="qa-num">22.</span> Як визначається, який контролер та який метод будуть виконуватися у відповідь на запит?</div>
+  <div class="qa-a">
+    Визначення відбувається у два кроки:<br><br>
+    <strong>1. Вибір контролера</strong> — за prefix URL:<br>
+    — <span class="ref">/api/content/*</span> → <span class="ref">ContentController</span> (зареєстрований у <span class="ref">server.ts</span> через <span class="ref">app.use("/api/content", createContentRouter(...))</span>)<br>
+    — <span class="ref">/api/storages/*</span> → <span class="ref">StorageController</span><br><br>
+    <strong>2. Вибір методу</strong> — за HTTP-метод + залишок URL:<br>
+    — <span class="ref">GET /</span> → <span class="ref">router.get("/")</span> → getAll<br>
+    — <span class="ref">GET /search</span> → <span class="ref">router.get("/search")</span> → search<br>
+    — <span class="ref">GET /1</span> → <span class="ref">router.get("/:id")</span> → getById<br>
+    — <span class="ref">POST /</span> → <span class="ref">router.post("/")</span> → create<br>
+    — <span class="ref">PATCH /7/availability</span> → <span class="ref">router.patch("/:id/availability")</span> → setAvailability<br><br>
+    В ASP.NET це робить <strong>Action Selector</strong> на основі атрибутів <span class="ref">[HttpGet]</span>, <span class="ref">[HttpPost]</span> та шаблону маршруту.
+  </div>
+</div>
+
+</body>
+</html>

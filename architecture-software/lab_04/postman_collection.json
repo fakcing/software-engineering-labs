@@ -1,0 +1,186 @@
+{
+  "info": {
+    "name": "Lab 04 — Content Library API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Storages",
+      "item": [
+        {
+          "name": "GET all storages",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:3000/api/storages"
+          }
+        },
+        {
+          "name": "GET storage by ID",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:3000/api/storages/1"
+          }
+        },
+        {
+          "name": "POST create storage",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Локальний диск\",\n  \"location\": \"D:/library\"\n}"
+            },
+            "url": "http://localhost:3000/api/storages"
+          }
+        },
+        {
+          "name": "PATCH deactivate storage",
+          "request": {
+            "method": "PATCH",
+            "url": "http://localhost:3000/api/storages/3/deactivate"
+          }
+        },
+        {
+          "name": "DELETE storage",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:3000/api/storages/4"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Content",
+      "item": [
+        {
+          "name": "GET all content",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:3000/api/content"
+          }
+        },
+        {
+          "name": "GET content by ID",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:3000/api/content/1"
+          }
+        },
+        {
+          "name": "GET search — by author (Martin)",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:3000/api/content/search?author=Martin"
+          }
+        },
+        {
+          "name": "GET search — books only",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:3000/api/content/search?type=book"
+          }
+        },
+        {
+          "name": "GET search — available only",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:3000/api/content/search?isAvailable=true"
+          }
+        },
+        {
+          "name": "GET search — combined",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:3000/api/content/search?type=book&isAvailable=true"
+          }
+        },
+        {
+          "name": "POST create content (book)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Refactoring\",\n  \"author\": \"Martin Fowler\",\n  \"type\": \"book\",\n  \"format\": \"pdf\",\n  \"storageId\": 1,\n  \"genre\": \"Programming\",\n  \"language\": \"en\",\n  \"year\": 2018,\n  \"pageCount\": 448,\n  \"tags\": [\"refactoring\", \"patterns\"]\n}"
+            },
+            "url": "http://localhost:3000/api/content"
+          }
+        },
+        {
+          "name": "POST create content (video)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Clean Architecture Talk\",\n  \"author\": \"Robert C. Martin\",\n  \"type\": \"video\",\n  \"format\": \"mp4\",\n  \"storageId\": 3,\n  \"genre\": \"Education\",\n  \"language\": \"en\",\n  \"year\": 2022,\n  \"durationSeconds\": 5400\n}"
+            },
+            "url": "http://localhost:3000/api/content"
+          }
+        },
+        {
+          "name": "POST create content — INVALID format (має дати 400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Test\",\n  \"author\": \"Test\",\n  \"type\": \"book\",\n  \"format\": \"mp3\",\n  \"storageId\": 1\n}"
+            },
+            "url": "http://localhost:3000/api/content"
+          }
+        },
+        {
+          "name": "PUT update content",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"year\": 2019,\n  \"genre\": \"Software Engineering\"\n}"
+            },
+            "url": "http://localhost:3000/api/content/10"
+          }
+        },
+        {
+          "name": "PATCH set unavailable",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isAvailable\": false\n}"
+            },
+            "url": "http://localhost:3000/api/content/7/availability"
+          }
+        },
+        {
+          "name": "PATCH set available",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isAvailable\": true\n}"
+            },
+            "url": "http://localhost:3000/api/content/7/availability"
+          }
+        },
+        {
+          "name": "DELETE content",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:3000/api/content/10"
+          }
+        },
+        {
+          "name": "GET not found (має дати 404)",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:3000/api/content/9999"
+          }
+        }
+      ]
+    }
+  ]
+}
